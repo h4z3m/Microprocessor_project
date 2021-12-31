@@ -1,0 +1,507 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+noname.exe_ -- emu8086 assembler version: 4.08  
+ 
+[ 12/31/2021  --  12:32:56 AM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .model SMALL
+[   2]        :                                       .stack 64
+[   3]        :                                       .data
+[   4]    0040: 30 31 32 33 34 35 36 37 38 39 41 42   HEX_CONV            DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+                43 44 45 46                         
+[   5]    0050: 00 00 00 00                           ascii_result        db 4 dup(?)
+[   6]    0054: 00 00                                 buffer_ascii        dw ?
+[   7]    0056: 31 31 31 31                           num                 db '1','1','1','1'
+[   8]    005A: 00 00                                 res                 dw ?
+[   9]    005C: 41 58 7E 7E                           OP1_STRING          DB 'AX~~'
+[  10]    0060: 42 58 7E 7E                           OP2_STRING          DB 'BX~~'
+[  11]    0064: 00                                    OP1_SIZE DB 0
+[  12]    0065: 00                                    OP2_SIZE DB 0
+[  13]        :                                       PLAYER1 EQU 0
+[  14]        :                                       PLAYER2 EQU 0FFH
+[  15]    0066: 00 00                                 PLAYER_INPUT_STRING DW 0
+[  16]    0068: 6D 6F 76 20 61 78 2C 31 31 0A         INPUT_STRING        DB 'mov ax,11',10
+[  17]        :                                       ESC_SCODE EQU 1
+[  18]        :                                       F1_SCODE EQU 03bh
+[  19]        :                                       F2_SCODE EQU 03ch
+[  20]        :                                       F4_SCODE EQU 03EH
+[  21]    0072: 07 07 07 07 07 07 07 07 07 07 07 07   PLAYER1_MEMORY DB 16 DUP(7)
+                07 07 07 07                         
+[  22]    0082: 7A 32 64 66                           vv db 'z2df'
+[  23]    0086: 00                                    T1 DB ?
+[  24]    0087: 00                                    T2 DB ?
+[  25]    0088: 0F 00 00 00 00 00 00 00 00 00 00 00   input_buffer DB 15,?,15 dup(?)
+                00 00 00 00 00                      
+[  26]    0099: 00 00                                 buffer_num DW 0
+[  27]    009B: 00 00                                 PLAYER1_POINTS DW 0
+[  28]    009D: 00 00                                 current_exec_cpu dw 0
+[  29]    009F: 00 00                                 current_exec_op1 dw 0
+[  30]    00A1: 00 00                                 current_exec_op2 dw 0
+[  31]    00A3:                                       AX_REG_2 LABEL WORD
+[  32]    00A3: 23                                    AL_REG_2 DB 023H
+[  33]    00A4: 05                                    AH_REG_2 DB 05H
+[  34]        :                                       
+[  35]    00A5:                                       BX_REG_2 LABEL WORD
+[  36]    00A5: 99                                    BL_REG_2 DB 099H
+[  37]    00A6: EC                                    BH_REG_2 DB 0ECH
+[  38]        :                                       
+[  39]    00A7:                                       CX_REG_2 LABEL WORD
+[  40]    00A7: 00                                    CL_REG_2 DB ?
+[  41]    00A8: 00                                    CH_REG_2 DB ?
+[  42]        :                                       
+[  43]    00A9:                                       DX_REG_2 LABEL WORD
+[  44]    00A9: 00                                    DL_REG_2 DB ?
+[  45]    00AA: 00                                    DH_REG_2 DB ?
+[  46]        :                                       
+[  47]    00AB: 00 00                                 SI_REG_2 DW ?
+[  48]    00AD: 00 00                                 DI_REG_2 DW ?
+[  49]    00AF: 00 00                                 BP_REG_2 DW ?
+[  50]    00B1: 00 00                                 SP_REG_2 DW ?
+[  51]    00B3:                                       AX_REG_1 LABEL WORD
+[  52]    00B3: AB                                    AL_REG_1 DB 0ABH
+[  53]    00B4: CD                                    AH_REG_1 DB 0CDH
+[  54]        :                                       
+[  55]    00B5:                                       BX_REG_1 LABEL WORD
+[  56]    00B5: 3F                                    BL_REG_1 DB 03FH
+[  57]    00B6: 9E                                    BH_REG_1 DB 09EH
+[  58]        :                                       
+[  59]    00B7:                                       CX_REG_1 LABEL WORD
+[  60]    00B7: 33                                    CL_REG_1 DB 033H
+[  61]    00B8: AC                                    CH_REG_1 DB 0ACH
+[  62]        :                                       
+[  63]    00B9:                                       DX_REG_1 LABEL WORD
+[  64]    00B9: EA                                    DL_REG_1 DB 0EAH
+[  65]    00BA: FF                                    DH_REG_1 DB 0FFH
+[  66]        :                                       
+[  67]    00BB: AD BF                                 SI_REG_1 DW 0BFADH
+[  68]    00BD: 9F 09                                 DI_REG_1 DW 099FH
+[  69]    00BF: 01 00                                 BP_REG_1 DW 01H
+[  70]    00C1: 55 01                                 SP_REG_1 DW 0155H
+[  71]    00C3: 00 00                                 current_instruction_width dw 0
+[  72]    00C5: 41 58 42 58 43 58 44 58 53 49 44 49   REG16_NAMES DB 'AX','BX','CX','DX','SI','DI','BP','SP' ; REGISTER 16 BIT 8 REGISTER
+                42 50 53 50                         
+[  73]    00D5: 5B 42 58 5D 5B 53 49 5D 5B 44 49 5D   REG16_Address DB '[BX]','[SI]','[DI]','[BP]','[00]','[01]','[02]','[03]','[04]','[05]','[06]','[07]','[08]','[09]','[0A]','[0B]','[0C]','[0D]','[0E]','[0F]' ; ADDRESS REGISTER
+                5B 42 50 5D 5B 30 30 5D 5B 30 31 5D 
+                5B 30 32 5D 5B 30 33 5D 5B 30 34 5D 
+                5B 30 35 5D 5B 30 36 5D 5B 30 37 5D 
+                5B 30 38 5D 5B 30 39 5D 5B 30 41 5D 
+                5B 30 42 5D 5B 30 43 5D 5B 30 44 5D 
+                5B 30 45 5D 5B 30 46 5D             
+[  74]    0125: 5B 30 30 5D 5B 30 31 5D 5B 30 32 5D   NUM_ADDRESS DB '[00]','[01]','[02]','[03]','[04]','[05]','[06]','[07]','[08]','[09]','[0A]','[0B]','[0C]','[0D]','[0E]','[0F]'
+                5B 30 33 5D 5B 30 34 5D 5B 30 35 5D 
+                5B 30 36 5D 5B 30 37 5D 5B 30 38 5D 
+                5B 30 39 5D 5B 30 41 5D 5B 30 42 5D 
+                5B 30 43 5D 5B 30 44 5D 5B 30 45 5D 
+                5B 30 46 5D                         
+[  75]    0165: 5B 42 58 5D 5B 53 49 5D 5B 44 49 5D   REG16_Address_16 DB '[BX]','[SI]','[DI]','[BP]'
+                5B 42 50 5D                         
+[  76]    0175: 41 4C 42 4C 43 4C 44 4C 41 48 42 48   REG8_NAMES DB 'AL','BL','CL','DL','AH','BH','CH','DH' ; REGISTER 8 BIT 8 REGISTER
+                43 48 44 48                         
+[  77]    0185: 30 31 32 33 34 35 36 37 38 39 41 42   NUM_HEXA DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' ;  NUMBER TO CHECK FOR FOUR BIT
+                43 44 45 46                         
+[  78]    0195: 50 55 53 48 20 4F 52 20 50 4F 50 20   INSTRUCTIONS_CONV DB 'PUSH ','OR ','POP ','MOV ','NOP ','ADD ','SUB ','XOR ','AND ','SHR ','SHL ','SAR ','ROR ','INC ','DEC ','ROL ','ADC ','SBB ','CLC ','RCR ','RCL '
+                4D 4F 56 20 4E 4F 50 20 41 44 44 20 
+                53 55 42 20 58 4F 52 20 41 4E 44 20 
+                53 48 52 20 53 48 4C 20 53 41 52 20 
+                52 4F 52 20 49 4E 43 20 44 45 43 20 
+                52 4F 4C 20 41 44 43 20 53 42 42 20 
+                43 4C 43 20 52 43 52 20 52 43 4C 20 
+                                                    
+[  79]    01E9: 4D 4F 56 20 41 58 2C 42 58 0A         input_str db 'MOV AX,BX',10
+[  80]        :                                       .code
+[  81]        :                                       MOV_EXECUTE MACRO WIDTH
+[  82]        :                                       LOCAL _8BIT,_16BIT,DONE
+[  83]        :                                       MOV SI,current_exec_op1
+[  84]        :                                       MOV DI,current_exec_op2
+[  85]        :                                       CMP WIDTH,1
+[  86]        :                                       JNZ  _16BIT
+[  87]        :                                       _8BIT:
+[  88]        :                                       MOV AL,[si]
+[  89]        :                                       MOV CL,[di]
+[  90]        :                                       MOV AL,CL
+[  91]        :                                       MOV BYTE PTR [SI],AL
+[  92]        :                                       JMP  DONE
+[  93]        :                                       _16BIT:
+[  94]        :                                       MOV AX,[si]
+[  95]        :                                       MOV CX,[di]
+[  96]        :                                       MOV AX,CX
+[  97]        :                                       MOV [SI],AX
+[  98]        :                                       DONE:
+[  99]        :                                       ENDM
+[ 100]    0200:                                       main proc far
+[ 101]    0200: B8 04 00                              mov  ax,@data
+[ 102]    0203: 8E D8                                 mov  ds,ax
+[ 103]    0205: B8 13 00                              MOV AX,13h  ; 320x200 256 colors
+[ 104]        :                                       ;MOV AX,06H  ; 640x200 16  colors
+[ 105]    0208: B7 00                                 MOV BH,0H   ; First page on screen
+[ 106]    020A: CD 10                                 INT 10H
+[ 107]    020C: B8 04 00                              MOV AX,@DATA
+[ 108]    020F: 8E C0                                 MOV ES,AX
+[ 109]    0211: B9 04 00                              MOV CX,4
+[ 110]    0214: BE 55 01                              LEA SI,INSTRUCTIONS_CONV
+[ 111]    0217: BF A9 01                              LEA DI,input_str
+[ 112]    021A:                                       CHECK_MOV:
+[ 113]    021A: 83 F9 00                              CMP CX,0
+[ 114]    021D: 74 0C                                 JZ MOV_OPERAND
+[ 115]    021F: 8A 44 0C                              MOV AL,[SI+12]
+[ 116]    0222: 8A 1D                                 MOV BL,[DI]
+[ 117]    0224: 46                                    INC SI
+[ 118]    0225: 47                                    INC DI
+[ 119]    0226: 49                                    DEC CX
+[ 120]    0227: 3A C3                                 CMP AL,BL
+[ 121]    0229: 74 EF                                 JZ CHECK_MOV
+[ 122]    022B:                                       MOV_OPERAND:
+[ 123]    022B: BE 1C 00                              MOV SI,OFFSET OP1_STRING    ;get OFFSET OF OP1
+[ 124]    022E: 8A 04                                 MOV AL,[SI]
+[ 125]    0230: BF 85 00                              MOV DI,OFFSET REG16_NAMES   ; COMPARE IF OP1 IS 16-BIT REG
+[ 126]    0233: 8A 1D                                 MOV BL,[DI]
+[ 127]    0235: B9 08 00                              MOV CX,8
+[ 128]        :                                       ;;;;;;;;;;;;;;;;;;;;;;;; CHECK OPERAND1 16 BIT REG ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[ 129]    0238:                                       CHECK_REG16:
+[ 130]    0238: 83 F9 00                              CMP CX,0         ; IF ZERO MEAN CHECK IF OP1 8 BIT REG
+[ 131]        :                                       ;JZ CHECK_REG8
+[ 132]    023B: A7                                    CMPSW            ; IF OP1 EXIST CHECK OP2 MATCHING WITH OP1
+[ 133]    023C: 74 05                                 JZ CHECK_OP2_16  ; CHECK ADDRESS OP2
+[ 134]    023E: 47                                    INC DI
+[ 135]    023F: 47                                    INC DI
+[ 136]    0240: 49                                    DEC CX
+[ 137]    0241: 75 F5                                 JNZ CHECK_REG16 ; IF NOT CHECK NEXT OPERAND IN ARRAY
+[ 138]        :                                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CHECK OP2 REGISTER IS 16 BIT REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[ 139]    0243:                                       CHECK_OP2_16:
+[ 140]    0243: BB 02 00                              MOV BX,2
+[ 141]    0246: 89 1E 83 00                           MOV current_instruction_width,BX
+[ 142]    024A: 8B 45 FE                              MOV AX,[DI-2]
+[ 143]        :                                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;COMPARE TO ECEXUTE REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[ 144]        :                                       ; COMPARE AX TO EXECUTE
+[ 145]    024D: 3D 41 58                              CMP AX ,'XA'
+[ 146]    0250: 74 02                                 JZ OP1_EXEC_AX
+[ 147]    0252: 75 1B                                 JNZ OP1_CHECK_BX
+[ 148]    0254:                                       OP1_EXEC_AX:
+[ 149]    0254: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 150]    0259: 75 0A                                 JNZ OP1_CPU_PLAYER2_AX	
+[ 151]    025B: BE 73 00                              LEA SI,AX_REG_1
+[ 152]        :                                       ;LEA SI,AX_REG_1
+[ 153]    025E: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 154]    0262: E9 D7 00                              JMP CHECK_OP2
+[ 155]    0265:                                       OP1_CPU_PLAYER2_AX:
+[ 156]    0265: BE 63 00                              LEA SI,AX_REG_2
+[ 157]    0268: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 158]    026C: E9 CD 00                              JMP CHECK_OP2
+[ 159]        :                                       
+[ 160]        :                                       ; COMPARE BX TO EXECUTE
+[ 161]    026F:                                       OP1_CHECK_BX:	
+[ 162]    026F: 3D 42 58                              CMP AX ,'XB'
+[ 163]    0272: 74 02                                 JZ OP1_EXEC_BX
+[ 164]    0274: 75 1B                                 JNZ OP1_CHECK_CX
+[ 165]    0276:                                       OP1_EXEC_BX:
+[ 166]    0276: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 167]    027B: 75 0A                                 JNZ OP1_CPU_PLAYER2_BX	
+[ 168]    027D: BE 75 00                              LEA SI,BX_REG_1
+[ 169]        :                                       ;LEA SI,AX_REG_1
+[ 170]    0280: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 171]    0284: E9 B5 00                              JMP CHECK_OP2
+[ 172]    0287:                                       OP1_CPU_PLAYER2_BX:
+[ 173]    0287: BE 65 00                              LEA SI,BX_REG_2
+[ 174]    028A: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 175]    028E: E9 AB 00                              JMP CHECK_OP2
+[ 176]        :                                       ; COMPARE CX TO EXECUTE
+[ 177]    0291:                                       OP1_CHECK_CX:
+[ 178]    0291: 3D 43 58                              CMP AX ,'XC'
+[ 179]    0294: 74 02                                 JZ OP1_EXEC_CX
+[ 180]    0296: 75 15                                 JNZ OP1_CHECK_DX
+[ 181]    0298:                                       OP1_EXEC_CX:
+[ 182]    0298: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 183]    029D: 75 07                                 JNZ OP1_CPU_PLAYER2_CX	
+[ 184]    029F: BE 77 00                              LEA SI,CX_REG_1
+[ 185]        :                                       ;LEA SI,AX_REG_1
+[ 186]    02A2: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 187]    02A6:                                       OP1_CPU_PLAYER2_CX:
+[ 188]    02A6: BE 67 00                              LEA SI,CX_REG_2
+[ 189]    02A9: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 190]        :                                       
+[ 191]        :                                       
+[ 192]        :                                       ; COMPARE DX TO EXECUTE
+[ 193]    02AD:                                       OP1_CHECK_DX:	
+[ 194]    02AD: 3D 44 58                              CMP AX ,'XD'
+[ 195]    02B0: 74 02                                 JZ OP1_EXEC_DX
+[ 196]    02B2: 75 15                                 JNZ OP1_CHECK_SI
+[ 197]    02B4:                                       OP1_EXEC_DX:
+[ 198]    02B4: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 199]    02B9: 75 07                                 JNZ OP1_CPU_PLAYER2_DX
+[ 200]    02BB: BE 79 00                              LEA SI,DX_REG_1
+[ 201]        :                                       ;LEA SI,AX_REG_1
+[ 202]    02BE: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 203]    02C2:                                       OP1_CPU_PLAYER2_DX:
+[ 204]    02C2: BE 69 00                              LEA SI,DX_REG_2
+[ 205]    02C5: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 206]        :                                       
+[ 207]        :                                       ; COMPARE SI TO EXECUTE
+[ 208]    02C9:                                       OP1_CHECK_SI:
+[ 209]    02C9: 3D 53 49                              CMP AX ,'IS'
+[ 210]    02CC: 74 02                                 JZ OP1_EXEC_SI
+[ 211]    02CE: 75 15                                 JNZ OP1_CHECK_DI
+[ 212]    02D0:                                       OP1_EXEC_SI:
+[ 213]    02D0: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 214]    02D5: 75 07                                 JNZ OP1_CPU_PLAYER2_SI	
+[ 215]    02D7: BE 7B 00                              LEA SI,SI_REG_1
+[ 216]        :                                       ;LEA SI,AX_REG_1
+[ 217]    02DA: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 218]    02DE:                                       OP1_CPU_PLAYER2_SI:
+[ 219]    02DE: BE 6B 00                              LEA SI,SI_REG_2
+[ 220]    02E1: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 221]        :                                       
+[ 222]        :                                       ; COMPARE DI TO EXECUTE
+[ 223]    02E5:                                       OP1_CHECK_DI:
+[ 224]    02E5: 3D 44 49                              CMP AX ,'ID'
+[ 225]    02E8: 74 02                                 JZ OP1_EXEC_DI
+[ 226]    02EA: 75 15                                 JNZ OP1_CHECK_BP
+[ 227]    02EC:                                       OP1_EXEC_DI:
+[ 228]    02EC: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 229]    02F1: 75 07                                 JNZ OP1_CPU_PLAYER2_DI	
+[ 230]    02F3: BE 7D 00                              LEA SI,DI_REG_1
+[ 231]        :                                       ;LEA SI,AX_REG_1
+[ 232]    02F6: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 233]    02FA:                                       OP1_CPU_PLAYER2_DI:
+[ 234]    02FA: BE 6D 00                              LEA SI,DI_REG_2
+[ 235]    02FD: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 236]        :                                       
+[ 237]        :                                       
+[ 238]        :                                       ; COMPARE BP TO EXECUTE
+[ 239]    0301:                                       OP1_CHECK_BP:
+[ 240]    0301: 3D 42 50                              CMP AX ,'PB'
+[ 241]    0304: 74 02                                 JZ OP1_EXEC_BP
+[ 242]    0306: 75 15                                 JNZ OP1_CHECK_SP
+[ 243]    0308:                                       OP1_EXEC_BP:
+[ 244]    0308: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 245]    030D: 75 07                                 JNZ OP1_CPU_PLAYER2_BP	
+[ 246]    030F: BE 7F 00                              LEA SI,BP_REG_1
+[ 247]        :                                       ;LEA SI,AX_REG_1
+[ 248]    0312: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 249]    0316:                                       OP1_CPU_PLAYER2_BP:
+[ 250]    0316: BE 6F 00                              LEA SI,BP_REG_2
+[ 251]    0319: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 252]        :                                       
+[ 253]        :                                       ; COMPARE SP TO EXECUTE
+[ 254]    031D:                                       OP1_CHECK_SP:
+[ 255]    031D: 3D 53 50                              CMP AX ,'PS'
+[ 256]    0320: 74 05                                 JZ OP1_EXEC_SP
+[ 257]    0322: 74 03 E9 3D 01                        JNZ INVALID_INPUT
+[ 258]    0327:                                       OP1_EXEC_SP:
+[ 259]    0327: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 260]    032C: 75 07                                 JNZ OP1_CPU_PLAYER2_SP	
+[ 261]    032E: BE 81 00                              LEA SI,SP_REG_1
+[ 262]        :                                       ;LEA SI,AX_REG_1
+[ 263]    0331: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 264]    0335:                                       OP1_CPU_PLAYER2_SP:
+[ 265]    0335: BE 71 00                              LEA SI,SP_REG_2
+[ 266]    0338: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 267]        :                                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FINISH SET OP1 VALID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[ 268]    033C:                                       CHECK_OP2:
+[ 269]    033C: BE 20 00                              MOV SI,OFFSET OP2_STRING
+[ 270]    033F: 8A 04                                 MOV AL,[SI]
+[ 271]    0341: BF 85 00                              MOV DI,OFFSET REG16_NAMES
+[ 272]    0344: 8A 1D                                 MOV BL,[DI]
+[ 273]    0346: B9 08 00                              MOV CX,8
+[ 274]        :                                       
+[ 275]        :                                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CHECK OPERAND2-16-BIT REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+[ 276]    0349:                                       CHECK_REG16_OP2:
+[ 277]    0349: 83 F9 00                              CMP CX,0
+[ 278]        :                                       ;JZ OP2_ADDRESS                ; IF OP2 IS NOT REGISTER JZ TO CHECK IF IT IS ADDRESS
+[ 279]    034C: A7                                    CMPSW                         ; CPMPARE OP2 16 BIT IF YES JUMP VALID AND OP2 = 16
+[ 280]    034D: 74 05                                 JZ OP2_INTIALIZE_16           ; valid And JUMP MOVE INSTRUCTION
+[ 281]    034F: 4E                                    DEC SI
+[ 282]    0350: 4E                                    DEC SI
+[ 283]    0351: 49                                    DEC CX
+[ 284]    0352: 75 F5                                 JNZ CHECK_REG16_OP2           ; IF NOT ZERO CHECK FOR OTHER REG IN ARRAY
+[ 285]        :                                       
+[ 286]        :                                       
+[ 287]        :                                       
+[ 288]    0354:                                       OP2_INTIALIZE_16:
+[ 289]    0354: 8B 45 FE                              MOV AX,[DI-2]
+[ 290]        :                                       ; COMPARE AX TO EXECUTE
+[ 291]    0357: 3D 41 58                              CMP AX ,'XA'
+[ 292]    035A: 74 02                                 JZ OP2_EXEC_AX
+[ 293]    035C: 75 1B                                 JNZ OP2_CHECK_BX
+[ 294]    035E:                                       OP2_EXEC_AX:
+[ 295]    035E: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 296]    0363: 75 0A                                 JNZ OP2_CPU_PLAYER2_AX	
+[ 297]    0365: BE 73 00                              LEA SI,AX_REG_1
+[ 298]        :                                       ;LEA SI,AX_REG_1
+[ 299]    0368: 89 36 61 00                           MOV current_exec_op2,SI
+[ 300]    036C: E9 D4 00                              JMP away
+[ 301]    036F:                                       OP2_CPU_PLAYER2_AX:
+[ 302]    036F: BE 63 00                              LEA SI,AX_REG_2
+[ 303]    0372: 89 36 61 00                           MOV current_exec_op2,SI
+[ 304]    0376: E9 CA 00                              JMP away
+[ 305]        :                                       
+[ 306]        :                                       ; COMPARE BX TO EXECUTE
+[ 307]    0379:                                       OP2_CHECK_BX:	
+[ 308]    0379: 3D 42 58                              CMP AX ,'XB'
+[ 309]    037C: 74 02                                 JZ OP2_EXEC_BX
+[ 310]    037E: 75 1B                                 JNZ OP2_CHECK_CX
+[ 311]    0380:                                       OP2_EXEC_BX:
+[ 312]    0380: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 313]    0385: 75 0A                                 JNZ OP2_CPU_PLAYER2_BX	
+[ 314]    0387: BE 75 00                              LEA SI,BX_REG_1
+[ 315]        :                                       ;LEA SI,AX_REG_1
+[ 316]    038A: 89 36 61 00                           MOV current_exec_op2,SI
+[ 317]    038E: E9 B2 00                              JMP away
+[ 318]    0391:                                       OP2_CPU_PLAYER2_BX:
+[ 319]    0391: BE 65 00                              LEA SI,BX_REG_2
+[ 320]    0394: 89 36 61 00                           MOV current_exec_op2,SI
+[ 321]    0398: E9 A8 00                              JMP away
+[ 322]        :                                       ; COMPARE CX TO EXECUTE
+[ 323]    039B:                                       OP2_CHECK_CX:
+[ 324]    039B: 3D 43 58                              CMP AX ,'XC'
+[ 325]    039E: 74 02                                 JZ OP2_EXEC_CX
+[ 326]    03A0: 75 15                                 JNZ OP2_CHECK_DX
+[ 327]    03A2:                                       OP2_EXEC_CX:
+[ 328]    03A2: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 329]    03A7: 75 07                                 JNZ OP2_CPU_PLAYER2_CX	
+[ 330]    03A9: BE 77 00                              LEA SI,CX_REG_1
+[ 331]        :                                       ;LEA SI,AX_REG_1
+[ 332]    03AC: 89 36 61 00                           MOV current_exec_op2,SI
+[ 333]    03B0:                                       OP2_CPU_PLAYER2_CX:
+[ 334]    03B0: BE 67 00                              LEA SI,CX_REG_2
+[ 335]    03B3: 89 36 61 00                           MOV current_exec_op2,SI
+[ 336]        :                                       
+[ 337]        :                                       
+[ 338]        :                                       ; COMPARE DX TO EXECUTE
+[ 339]    03B7:                                       OP2_CHECK_DX:	
+[ 340]    03B7: 3D 44 58                              CMP AX ,'XD'
+[ 341]    03BA: 74 02                                 JZ OP2_EXEC_DX
+[ 342]    03BC: 75 15                                 JNZ OP2_CHECK_SI
+[ 343]    03BE:                                       OP2_EXEC_DX:
+[ 344]    03BE: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 345]    03C3: 75 07                                 JNZ OP2_CPU_PLAYER2_DX	
+[ 346]    03C5: BE 79 00                              LEA SI,DX_REG_1
+[ 347]        :                                       ;LEA SI,AX_REG_1
+[ 348]    03C8: 89 36 61 00                           MOV current_exec_op2,SI
+[ 349]    03CC:                                       OP2_CPU_PLAYER2_DX:
+[ 350]    03CC: BE 69 00                              LEA SI,DX_REG_2
+[ 351]    03CF: 89 36 61 00                           MOV current_exec_op2,SI
+[ 352]        :                                       
+[ 353]        :                                       ; COMPARE SI TO EXECUTE
+[ 354]    03D3:                                       OP2_CHECK_SI:
+[ 355]    03D3: 3D 53 49                              CMP AX ,'IS'
+[ 356]    03D6: 74 02                                 JZ OP2_EXEC_SI
+[ 357]    03D8: 75 15                                 JNZ OP2_CHECK_DI
+[ 358]    03DA:                                       OP2_EXEC_SI:
+[ 359]    03DA: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 360]    03DF: 75 07                                 JNZ OP2_CPU_PLAYER2_SI	
+[ 361]    03E1: BE 7B 00                              LEA SI,SI_REG_1
+[ 362]        :                                       ;LEA SI,AX_REG_1
+[ 363]    03E4: 89 36 61 00                           MOV current_exec_op2,SI
+[ 364]    03E8:                                       OP2_CPU_PLAYER2_SI:
+[ 365]    03E8: BE 6B 00                              LEA SI,SI_REG_2
+[ 366]    03EB: 89 36 61 00                           MOV current_exec_op2,SI
+[ 367]        :                                       
+[ 368]        :                                       ; COMPARE DI TO EXECUTE
+[ 369]    03EF:                                       OP2_CHECK_DI:
+[ 370]    03EF: 3D 44 49                              CMP AX ,'ID'
+[ 371]    03F2: 74 02                                 JZ OP2_EXEC_DI
+[ 372]    03F4: 75 15                                 JNZ OP2_CHECK_BP
+[ 373]    03F6:                                       OP2_EXEC_DI:
+[ 374]    03F6: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 375]    03FB: 75 07                                 JNZ OP2_CPU_PLAYER2_DI	
+[ 376]    03FD: BE 7D 00                              LEA SI,DI_REG_1
+[ 377]        :                                       ;LEA SI,AX_REG_1
+[ 378]    0400: 89 36 61 00                           MOV current_exec_op2,SI
+[ 379]    0404:                                       OP2_CPU_PLAYER2_DI:
+[ 380]    0404: BE 6D 00                              LEA SI,DI_REG_2
+[ 381]    0407: 89 36 61 00                           MOV current_exec_op2,SI
+[ 382]        :                                       
+[ 383]        :                                       
+[ 384]        :                                       ; COMPARE BP TO EXECUTE
+[ 385]    040B:                                       OP2_CHECK_BP:
+[ 386]    040B: 3D 42 50                              CMP AX ,'PB'
+[ 387]    040E: 74 02                                 JZ OP2_EXEC_BP
+[ 388]    0410: 75 15                                 JNZ OP2_CHECK_SP
+[ 389]    0412:                                       OP2_EXEC_BP:
+[ 390]    0412: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 391]    0417: 75 07                                 JNZ OP2_CPU_PLAYER2_BP	
+[ 392]    0419: BE 7F 00                              LEA SI,BP_REG_1
+[ 393]        :                                       ;LEA SI,AX_REG_1
+[ 394]    041C: 89 36 61 00                           MOV current_exec_op2,SI
+[ 395]    0420:                                       OP2_CPU_PLAYER2_BP:
+[ 396]    0420: BE 6F 00                              LEA SI,BP_REG_2
+[ 397]    0423: 89 36 61 00                           MOV current_exec_op2,SI
+[ 398]        :                                       
+[ 399]        :                                       ; COMPARE SP TO EXECUTE
+[ 400]    0427:                                       OP2_CHECK_SP:
+[ 401]    0427: 3D 53 50                              CMP AX ,'PS'
+[ 402]    042A: 74 02                                 JZ OP2_EXEC_SP
+[ 403]    042C: 75 36                                 JNZ INVALID_INPUT
+[ 404]    042E:                                       OP2_EXEC_SP:
+[ 405]    042E: 83 3E 5D 00 00                        CMP current_exec_cpu , PLAYER1
+[ 406]    0433: 75 07                                 JNZ OP2_CPU_PLAYER2_SP	
+[ 407]    0435: BE 81 00                              LEA SI,SP_REG_1
+[ 408]        :                                       ;LEA SI,AX_REG_1
+[ 409]    0438: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 410]    043C:                                       OP2_CPU_PLAYER2_SP:
+[ 411]    043C: BE 71 00                              LEA SI,SP_REG_2
+[ 412]    043F: 89 36 5F 00                           MOV current_exec_op1,SI
+[ 413]        :                                       
+[ 414]    0443:                                       away:
+[ 415]    0443: 8B 36 5F 00 8B 3E 61 00 83 3E 83 00   MOV_EXECUTE current_instruction_width
+                01 75 0A 8A 04 8A 0D 8A C1 88 04 EB 
+                08 8B 04 8B 0D 8B C1 89 04          
+[ 416]    0464:                                       INVALID_INPUT:
+[ 417]        :                                       
+[ 418]        :                                       
+[ 419]        :                                       main endp
+[ 420]        :                                       end main
+[ 421]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 64      -   bytes on last page (l.byte)
+0003: 00      -   bytes on last page (h.byte)
+0004: 04      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 02      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 40      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: CD      -   check sum (l.byte)
+0013: 44      -   check sum (h.byte)
+0014: 00      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 20      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 01      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 20      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022: 0D      -   relocation table - offset inside segment (l.byte)
+0023: 00      -   relocation table - offset inside segment (h.byte)
+0024: 20      -   relocation table - segment anchor (l.byte)
+0025: 00      -   relocation table - segment anchor (h.byte)
+0026 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

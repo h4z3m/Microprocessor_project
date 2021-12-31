@@ -1,0 +1,353 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+emu_testing.com_ -- emu8086 assembler version: 4.08  
+ 
+[ 12/27/2021  --  3:13:47 PM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .model tiny
+[   2]        :                                       .stack 64
+[   3]    0100: EB 27                                 .data
+[   4]    0102: 30 31 32 33 34 35 36 37 38 39 41 42   HEX_CONV DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+                43 44 45 46                         
+[   5]    0112: 00 00 00 00                           ascii_result db 4 dup(?)
+[   6]    0116: 00 00                                 buffer dw ?
+[   7]    0118: 65 32 63 44                           num db 'e2cD'
+[   8]    011C: 00 00                                 res dw ?
+[   9]    011E: 39 46 31 61                           dummy db '9F1a'
+[  10]    0122: 87                                    num1cpy DB 10000111B
+[  11]    0123: 87                                    num1 DB 10000111B
+[  12]    0124: 23                                    num2 DB 00100011B
+[  13]    0125: 00 00                                 current_exec_op1  dw 0
+[  14]    0127: 00 00                                 current_exec_op2  dw 0
+[  15]    0129:                                       .code
+[  16]        :                                       ConvertToDecimal MACRO var,len,buffer,result
+[  17]        :                                       LOCAL CONVERT,HEX,FINISH,SKIP,SKIP2,BYTES_2, DONE,UPPER,LOWER
+[  18]        :                                       
+[  19]        :                                       MOV CH,len  ; Size of variable (1 or 2 bytes)
+[  20]        :                                       SHL CH,1    ; Multiply by 2 -> since we need to loop 4 times if 2 bytes (FFFF) or 2 times if 1 byte (FF)
+[  21]        :                                       MOV CL,4
+[  22]        :                                       LEA BX,var
+[  23]        :                                       MOV AX,len
+[  24]        :                                       CMP AX,2
+[  25]        :                                       JZ BYTES_2
+[  26]        :                                       MOV DX,16   ; Variable is 1 byte so max divisor is 16 (16^1)
+[  27]        :                                       JMP DONE
+[  28]        :                                       BYTES_2:
+[  29]        :                                       MOV DX,4096 ; Variable is 2 bytes so max divisor is 4096 (16^3)
+[  30]        :                                       DONE:
+[  31]        :                                       
+[  32]        :                                       MOV buffer,0; Clear buffer first
+[  33]        :                                       
+[  34]        :                                       CONVERT:
+[  35]        :                                       ;16^= 4096  256   16      1
+[  36]        :                                       ;var= F      F     F      F
+[  37]        :                                       ;BX = 0      1     2      3
+[  38]        :                                       ;SHL= 2      4     4      x
+[  39]        :                                       MOV AH,0    ; Clear AH before multiplication
+[  40]        :                                       MOV AL,[BX] ; Get first character
+[  41]        :                                       
+[  42]        :                                       ;Check if number
+[  43]        :                                       SUB AL,48
+[  44]        :                                       CMP AL,9 ;57-48
+[  45]        :                                       JG HEX
+[  46]        :                                       ;ELSE-> NUMBER FROM 0-9
+[  47]        :                                       JMP SKIP
+[  48]        :                                       ;-------HEXADECIMAL CASE FOR UPPER OR LOWER CASE LETTERS-------;
+[  49]        :                                       HEX:
+[  50]        :                                       ADD AL,48
+[  51]        :                                       
+[  52]        :                                       ;CHECK IF UPPERCASE OR LOWER
+[  53]        :                                       SUB AL,65
+[  54]        :                                       CMP AL,15  ;70-65
+[  55]        :                                       JBE UPPER
+[  56]        :                                       ADD AL,65
+[  57]        :                                       
+[  58]        :                                       SUB AL,97
+[  59]        :                                       CMP AL,5 ; 102-97
+[  60]        :                                       JBE LOWER
+[  61]        :                                       
+[  62]        :                                       UPPER:
+[  63]        :                                       ADD AL,70
+[  64]        :                                       SUB AL,60 ; 70-10
+[  65]        :                                       JMP SKIP
+[  66]        :                                       LOWER:
+[  67]        :                                       ADD AL,97
+[  68]        :                                       SUB AL,87 ; 97 - 10
+[  69]        :                                       JMP SKIP
+[  70]        :                                       SKIP:
+[  71]        :                                       PUSH DX     ; Backup DX since it will change during multiplication
+[  72]        :                                       MUL DX      ; Multiply by 16^CX
+[  73]        :                                       POP DX      ; Retrieve old value of DX
+[  74]        :                                       ADD buffer,AX ; Buffer = AX + oldBuffer
+[  75]        :                                       FINISH:
+[  76]        :                                       ; Divide DL by BL
+[  77]        :                                       SHR DX,CL    ; Divide divisor by 16 (2^4)
+[  78]        :                                       INC BX      ; Get next character
+[  79]        :                                       DEC  CH     ; Decrement counter
+[  80]        :                                       JNZ CONVERT
+[  81]        :                                       ; Move final result to destination
+[  82]        :                                       MOV AX,buffer
+[  83]        :                                       MOV result,AX
+[  84]        :                                       ENDM
+[  85]        :                                       
+[  86]        :                                       
+[  87]        :                                       
+[  88]        :                                       CHECK_HEX MACRO var,len
+[  89]        :                                       LOCAL HEX,NOT_HEX,LOWER,UPPER,SKIP,CHECKING
+[  90]        :                                       LEA SI,dummy ; Pointer to number
+[  91]        :                                       MOV CL,4    ; Length of number (2/4 chars.)
+[  92]        :                                       CHECKING:
+[  93]        :                                       MOV AL,[SI]
+[  94]        :                                       ;Check if number
+[  95]        :                                       SUB AL,48
+[  96]        :                                       CMP AL,9 ;57-48
+[  97]        :                                       JA HEX
+[  98]        :                                       ;ELSE-> NUMBER FROM 0-9
+[  99]        :                                       JMP SKIP
+[ 100]        :                                       ;-------HEXADECIMAL CASE FOR UPPER OR LOWER CASE LETTERS-------;
+[ 101]        :                                       HEX:
+[ 102]        :                                       ADD AL,48
+[ 103]        :                                       
+[ 104]        :                                       ;CHECK IF UPPERCASE OR LOWER
+[ 105]        :                                       SUB AL,65
+[ 106]        :                                       CMP AL,15  ;70-65
+[ 107]        :                                       JBE UPPER
+[ 108]        :                                       ADD AL,65
+[ 109]        :                                       
+[ 110]        :                                       SUB AL,97
+[ 111]        :                                       CMP AL,5 ; 102-97
+[ 112]        :                                       JBE LOWER
+[ 113]        :                                       JMP NOT_HEX
+[ 114]        :                                       UPPER:
+[ 115]        :                                       ADD AL,70
+[ 116]        :                                       SUB AL,60 ; 70-10
+[ 117]        :                                       JMP SKIP
+[ 118]        :                                       LOWER:
+[ 119]        :                                       ADD AL,97
+[ 120]        :                                       SUB AL,87 ; 97 - 10
+[ 121]        :                                       JMP SKIP
+[ 122]        :                                       SKIP:
+[ 123]        :                                       INC SI
+[ 124]        :                                       DEC CL
+[ 125]        :                                       JNZ CHECKING
+[ 126]        :                                       NOT_HEX:
+[ 127]        :                                       CMP CL,0      ; To check if hex, CL should be zero, so ZF = 1
+[ 128]        :                                       ENDM
+[ 129]        :                                       XOR_INSTRUCTION MACRO WIDTH
+[ 130]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 131]        :                                       MOV SI,current_exec_op1
+[ 132]        :                                       MOV DI,current_exec_op2
+[ 133]        :                                       CMP WIDTH,1
+[ 134]        :                                       JNZ _16BIT
+[ 135]        :                                       _8BIT:
+[ 136]        :                                       MOV AL,[si]
+[ 137]        :                                       MOV BL,[di]
+[ 138]        :                                       XOR AL,BL
+[ 139]        :                                       MOV BYTE PTR [SI],AL
+[ 140]        :                                       JMP DONE
+[ 141]        :                                       _16BIT:
+[ 142]        :                                       MOV AX,[si]
+[ 143]        :                                       MOV BX,[di]
+[ 144]        :                                       XOR AX,BX
+[ 145]        :                                       MOV [SI],AX
+[ 146]        :                                       DONE:
+[ 147]        :                                       ENDM
+[ 148]        :                                       AND_INSTRUCTION MACRO WIDTH
+[ 149]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 150]        :                                       MOV SI,current_exec_op1
+[ 151]        :                                       MOV DI,current_exec_op2
+[ 152]        :                                       CMP WIDTH,1
+[ 153]        :                                       JNZ _16BIT
+[ 154]        :                                       _8BIT:
+[ 155]        :                                       MOV AL,[si]
+[ 156]        :                                       MOV BL,[di]
+[ 157]        :                                       AND AL,BL
+[ 158]        :                                       MOV BYTE PTR [SI],AL
+[ 159]        :                                       JMP DONE
+[ 160]        :                                       _16BIT:
+[ 161]        :                                       MOV AX,[si]
+[ 162]        :                                       MOV BX,[di]
+[ 163]        :                                       AND AX,BX
+[ 164]        :                                       MOV [SI],AX
+[ 165]        :                                       DONE:
+[ 166]        :                                       ENDM
+[ 167]        :                                       OR_INSTRUCTION MACRO WIDTH
+[ 168]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 169]        :                                       MOV SI,current_exec_op1
+[ 170]        :                                       MOV DI,current_exec_op2
+[ 171]        :                                       CMP WIDTH,1
+[ 172]        :                                       JNZ _16BIT
+[ 173]        :                                       _8BIT:
+[ 174]        :                                       MOV AL,[si]
+[ 175]        :                                       MOV BL,[di]
+[ 176]        :                                       OR AL,BL
+[ 177]        :                                       MOV BYTE PTR [SI],AL
+[ 178]        :                                       JMP DONE
+[ 179]        :                                       _16BIT:
+[ 180]        :                                       MOV AX,[si]
+[ 181]        :                                       MOV BX,[di]
+[ 182]        :                                       OR AX,BX
+[ 183]        :                                       MOV [SI],AX
+[ 184]        :                                       DONE:
+[ 185]        :                                       ENDM
+[ 186]        :                                       SHL_INSTRUCTION MACRO WIDTH
+[ 187]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 188]        :                                       MOV SI,current_exec_op1
+[ 189]        :                                       MOV DI,current_exec_op2
+[ 190]        :                                       CMP WIDTH,1
+[ 191]        :                                       JNZ _16BIT
+[ 192]        :                                       _8BIT:
+[ 193]        :                                       MOV AL,[si]
+[ 194]        :                                       MOV CL,[di]
+[ 195]        :                                       SHL AL,CL
+[ 196]        :                                       MOV BYTE PTR [SI],AL
+[ 197]        :                                       JMP DONE
+[ 198]        :                                       _16BIT:
+[ 199]        :                                       MOV AX,[si]
+[ 200]        :                                       MOV CX,[di]
+[ 201]        :                                       SHL AX,CL
+[ 202]        :                                       MOV [SI],AX
+[ 203]        :                                       DONE:
+[ 204]        :                                       ENDM
+[ 205]        :                                       SHr_INSTRUCTION MACRO WIDTH
+[ 206]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 207]        :                                       MOV SI,current_exec_op1
+[ 208]        :                                       MOV DI,current_exec_op2
+[ 209]        :                                       CMP WIDTH,1
+[ 210]        :                                       JNZ _16BIT
+[ 211]        :                                       _8BIT:
+[ 212]        :                                       MOV AL,[si]
+[ 213]        :                                       MOV CL,[di]
+[ 214]        :                                       SHR AL,CL
+[ 215]        :                                       MOV BYTE PTR [SI],AL
+[ 216]        :                                       JMP DONE
+[ 217]        :                                       _16BIT:
+[ 218]        :                                       MOV AX,[si]
+[ 219]        :                                       MOV CX,[di]
+[ 220]        :                                       SHR AX,CL
+[ 221]        :                                       MOV [SI],AX
+[ 222]        :                                       DONE:
+[ 223]        :                                       ENDM
+[ 224]        :                                       SAR_INSTRUCTION MACRO WIDTH
+[ 225]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 226]        :                                       MOV SI,current_exec_op1
+[ 227]        :                                       MOV DI,current_exec_op2
+[ 228]        :                                       CMP WIDTH,1
+[ 229]        :                                       JNZ _16BIT
+[ 230]        :                                       _8BIT:
+[ 231]        :                                       MOV AL,[si]
+[ 232]        :                                       MOV CL,[di]
+[ 233]        :                                       SAR AL,CL
+[ 234]        :                                       MOV BYTE PTR [SI],AL
+[ 235]        :                                       JMP DONE
+[ 236]        :                                       _16BIT:
+[ 237]        :                                       MOV AX,[si]
+[ 238]        :                                       MOV CX,[di]
+[ 239]        :                                       SAR AX,CL
+[ 240]        :                                       MOV [SI],AX
+[ 241]        :                                       DONE:
+[ 242]        :                                       ENDM
+[ 243]        :                                       ROR_INSTRUCTION MACRO WIDTH
+[ 244]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 245]        :                                       MOV SI,current_exec_op1
+[ 246]        :                                       MOV DI,current_exec_op2
+[ 247]        :                                       CMP WIDTH,1
+[ 248]        :                                       JNZ _16BIT
+[ 249]        :                                       _8BIT:
+[ 250]        :                                       MOV AL,[si]
+[ 251]        :                                       MOV CL,[di]
+[ 252]        :                                       ROR AL,CL
+[ 253]        :                                       MOV BYTE PTR [SI],AL
+[ 254]        :                                       JMP DONE
+[ 255]        :                                       _16BIT:
+[ 256]        :                                       MOV AX,[si]
+[ 257]        :                                       MOV CX,[di]
+[ 258]        :                                       ROR AX,CL
+[ 259]        :                                       MOV [SI],AX
+[ 260]        :                                       DONE:
+[ 261]        :                                       ENDM
+[ 262]        :                                       ROL_INSTRUCTION MACRO WIDTH
+[ 263]        :                                       LOCAL _8BIT,_16BIT,DONE
+[ 264]        :                                       MOV SI,current_exec_op1
+[ 265]        :                                       MOV DI,current_exec_op2
+[ 266]        :                                       CMP WIDTH,1
+[ 267]        :                                       JNZ _16BIT
+[ 268]        :                                       _8BIT:
+[ 269]        :                                       MOV AL,[si]
+[ 270]        :                                       MOV CL,[di]
+[ 271]        :                                       ROL AL,CL
+[ 272]        :                                       MOV BYTE PTR [SI],AL
+[ 273]        :                                       JMP DONE
+[ 274]        :                                       _16BIT:
+[ 275]        :                                       MOV AX,[si]
+[ 276]        :                                       MOV CX,[di]
+[ 277]        :                                       ROL AX,CL
+[ 278]        :                                       MOV [SI],AX
+[ 279]        :                                       DONE:
+[ 280]        :                                       ENDM
+[ 281]        :                                       
+[ 282]        :                                       
+[ 283]    0129:                                       main proc far
+[ 284]    0129: 8C C8                                 mov ax,@data
+[ 285]    012B: 8E D8                                 mov ds,ax
+[ 286]    012D: B8 1C FF                              mov ax,0ff1Ch
+[ 287]        :                                       
+[ 288]        :                                       
+[ 289]    0130: B8 23 01                              LEA AX,num1
+[ 290]    0133: BB 24 01                              LEA BX,num2
+[ 291]    0136: A3 25 01                              MOV current_exec_op1,AX
+[ 292]    0139: 89 1E 27 01                           MOV current_exec_op2,BX
+[ 293]        :                                       
+[ 294]        :                                       ;CHECK WIDTH OF REGISTER
+[ 295]    013D: B1 01                                 MOV cl,1
+[ 296]    013F: 8B 36 25 01 8B 3E 27 01 80 F9 01 75   SAR_INSTRUCTION cl
+                0A 8A 04 8A 0D D2 F8 88 04 EB 08 8B 
+                04 8B 0D D3 F8 89 04                
+[ 297]    015E: F4                                    hlt
+[ 298]        :                                       
+[ 299]        :                                       
+[ 300]    015F: B5 02 D0 E5 B1 04 BB 1E 01 B8 02 00   ConvertToDecimal dummy,2,buffer,res
+                3D 02 00 74 05 BA 10 00 EB 03 BA 00 
+                10 C7 06 16 01 00 00 B4 00 8A 07 2C 
+                30 3C 09 7F 02 EB 1C 04 30 2C 41 3C 
+                0F 76 08 04 41 2C 61 3C 05 76 06 04 
+                46 2C 3C EB 06 04 61 2C 57 EB 00 52 
+                F7 E2 5A 01 06 16 01 D3 EA 43 FE CD 
+                75 C9 A1 16 01 A3 1C 01             
+[ 301]        :                                       
+[ 302]    01BB: BE 1E 01 B1 04 8A 04 2C 30 3C 09 77   CHECK_HEX dummy,2
+                02 EB 1E 04 30 2C 41 3C 0F 76 0A 04 
+                41 2C 61 3C 05 76 08 EB 11 04 46 2C 
+                3C EB 06 04 61 2C 57 EB 00 46 FE C9 
+                75 D3 80 F9 00                      
+[ 303]    01F0: 74 02                                 JZ ITS_HEX!
+[ 304]    01F2: 75 05                                 JNZ NOT1_HEX
+[ 305]        :                                       
+[ 306]    01F4:                                       ITS_HEX!:
+[ 307]    01F4: B8 FF FF                              MOV AX,0FFFFH
+[ 308]    01F7: EB 05                                 JMP DONE
+[ 309]        :                                       
+[ 310]    01F9:                                       NOT1_HEX:
+[ 311]    01F9: B8 DD DD                              MOV AX,0DDDDH
+[ 312]    01FC: EB 00                                 JMP DONE
+[ 313]    01FE:                                       DONE:
+[ 314]        :                                       main endp
+[ 315]        :                                       ; AND AX,49
+[ 316]        :                                       ; MOV AX,[5]
+[ 317]        :                                       ;    current_exec_op1 = contents of ax
+[ 318]        :                                       ;    current_exec_op2 = contents of addr 5
+[ 319]        :                                       
+[ 320]        :                                       end main
+[ 321]        :                                       
+ 
+===================================================================================================
+ 
+
+
+
+
+===================================================================================================

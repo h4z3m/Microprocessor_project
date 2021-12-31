@@ -1,0 +1,198 @@
+.MODEL SMALL
+.STACK 64
+.DATA
+message db 'This is a message','$'
+ErrorMsg db 'ERROR: READ FILE FAILED','$'
+indata db 30,?,30 dup('$')
+filename db 'red.bmp',0
+filehandle dw ?          ;
+ScrLine db 320 dup (0)
+imageHeader db 54 dup(?)
+Palette db 1024 dup(7)
+.CODE
+
+OpenFile PROC NEAR
+MOV ah, 3Dh     ; Open file option
+XOR AL,AL       ; Clear AL
+MOV DX, offset filename ; Load filename string offset
+INT 21h
+JC openerror    ; Error opening file
+MOV [filehandle], AX ; File opened successfully, store in filehandle
+RET
+openerror:
+MOV DX, offset ErrorMsg
+MOV AH, 9H      ; Display string option
+INT 21h
+RET
+OpenFile ENDP
+
+CloseFile PROC  NEAR
+MOV AH,3EH ; Close file option
+XOR AL,AL  ; Clear AL
+MOV BX,filehandle ; Load filehandle address
+INT 21H
+JC CloseError
+RET
+CloseError:
+MOV DX, offset ErrorMsg
+MOV AH, 9H      ; Display string option
+INT 21h
+RET
+CloseFile ENDP
+
+ReadFile PROC NEAR
+MOV AH, 3FH ; Read from file option
+XOR AL,AL   ; Clear AL
+MOV BX,[filehandle] ; File to read from
+LEA DX,Palette
+MOV CX,400H ; Number of bytes to read 1024 bytes -> 256 colors * 4 bytes
+INT 21H
+RET
+ReadFile ENDP
+
+SetPalette PROC NEAR
+PUSHA
+MOV BX,AX
+MOV CL,2
+
+MOV AL,DH
+AND AL,00001111B
+SHL AL,CL
+MOV CH,AL
+
+MOV AL,DL
+AND AL,11110000B
+SHR AL,CL
+MOV DH,AL
+
+MOV AL,DL
+AND AL,00001111B
+SHL AL,CL
+MOV CL,AL
+
+MOV BH,0
+MOV AX,1010H
+INT 10H
+POPA
+RET
+SetPalette ENDP
+
+setPixelPalette MACRO index,r,g,b
+mov bx, index
+mov dh, r
+mov ch, g
+mov cl, b
+mov ax, 1010h  ; BIOS.SetIndividualColorRegister
+int 10h
+ENDM setPixelPalette
+
+FIXPALETTE PROC NEAR
+PUSHA
+LEA SI,Palette
+ADD SI,56
+MOV AX,0
+FIX:
+MOV DX,[SI]
+
+CALL SetPalette
+
+INC SI
+INC SI
+INC AX
+CMP AX,16
+JNZ FIX
+
+POPA
+RET
+FIXPALETTE ENDP
+
+DrawImage PROC NEAR
+MOV AX,0A000H
+MOV ES,AX   ; Extra segment points to Video-RAM
+
+
+LEA SI,Palette ; Image data in BGR format
+ADD SI,54        ; Skip 54 header bytes
+MOV DI,0         ; First pixel pos in vram
+MOV CX,200       ; Screen height or lines on screen
+CLD              ; Increment DI,SI
+; offset = y*320 + x  -> CX * 6 , DI * 8 -->> DI= 8DI + 6CX-->>
+REP MOVSW
+
+RET
+
+DrawImage ENDP
+
+
+MAIN PROC FAR
+MOV AX,@DATA
+MOV DS,AX
+
+MOV AX,13h
+INT 10h
+MOV AX,0A000H
+MOV ES,AX
+CALL OpenFile
+CALL ReadFile
+CALL FIXPALETTE
+CALL DrawImage
+;MOV CX,50
+;    mov dl,'5'
+;    mov ah,02
+;    int 21h
+;     hlt
+;    L:
+;    PUSH CX
+;    setPixelPalette CX,255,0,0
+;    POP CX
+;    LOOP L
+;    mov di,25000
+;    MOV ES:DI,7
+
+;LEA SI,imageData+54
+;    MOV DI,0
+;    MOV CX,1500
+;    REP MOVSW
+;
+
+
+;CALL OpenFile
+;CALL ReadFile
+;CALL FIXPALETTE
+;CALL DrawImage
+;CALL CloseFile
+;  LEA SI,imageData+54
+;    MOV DI,0
+;    L:
+;    MOV AX,[SI]
+;    MOV ES:[DI],AX
+;    ADD DI,500
+;    JMP L
+
+
+;
+
+
+
+
+MOV AH,04CH
+MOV AL,0
+INT 21H
+
+
+; MOV AL,9
+;    MOV AH,9
+;    LEA DX,message
+;    int 21h
+;    MOV AH,0AH
+;    LEA DX,indata
+;    INT 21H
+
+
+
+MAIN ENDP
+END MAIN
+
+
+
+; [SOURCE]: C:\Users\h4z3m\Desktop\Microprocessor_project\video_mode.asm

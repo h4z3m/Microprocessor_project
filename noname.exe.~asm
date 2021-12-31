@@ -1,0 +1,88 @@
+.Model Small
+.Stack 64
+.Data
+chickenWidth EQU 320
+chickenHeight EQU 200
+
+chickenFilename DB 'chick.bin', 0
+
+chickenFilehandle DW ?
+
+chickenData DB 320*200 dup(0)
+
+.Code
+OpenFile MACRO
+
+; Open file
+
+MOV AH, 03Dh
+MOV AL, 0 ; read only
+LEA DX, chickenFilename
+INT 21h
+; you should check carry flag to make sure it worked correctly
+; carry = 0 -> successful , file handle -> AX
+; carry = 1 -> failed , AX -> error code
+
+MOV [chickenFilehandle], AX
+ENDM OpenFile
+
+ReadData MACRO
+MOV AH,03Fh
+MOV BX, [chickenFilehandle]
+MOV CX,1024 ; number of bytes to read
+LEA DX, chickenData
+INT 21h
+
+ENDM ReadData
+
+
+MAIN PROC FAR
+MOV AX , @DATA
+MOV DS , AX
+
+MOV AH, 0
+MOV AL, 13h
+INT 10h
+
+OpenFile
+ReadData
+
+LEA BX , chickenData ; BL contains index at the current drawn pixel
+
+MOV CX,0
+MOV DX,0
+MOV AH,0ch
+
+; Drawing loop
+drawLoop:
+MOV AL,[BX]
+INT 10h
+INC CX
+INC BX
+CMP CX,chickenWidth
+JNE drawLoop
+
+MOV CX , 0
+INC DX
+CMP DX , chickenHeight
+JNE drawLoop
+
+
+; Press any key to exit
+MOV AH , 0
+INT 16h
+
+
+
+;Change to Text MODE
+MOV AH,0
+MOV AL,03h
+INT 10h
+
+; return control to operating system
+MOV AH , 4ch
+INT 21H
+
+ENDP MAIN
+END MAIN
+

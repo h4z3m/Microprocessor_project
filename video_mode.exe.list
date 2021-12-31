@@ -1,0 +1,406 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+video_mode.exe -- emu8086 assembler version: 4.08  
+ 
+[ 12/24/2021  --  1:57:16 AM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .MODEL SMALL
+[   2]        :                                       .STACK 64
+[   3]        :                                       .DATA
+[   4]    0040: 54 68 69 73 20 69 73 20 61 20 6D 65   message db 'This is a message','$'
+                73 73 61 67 65 24                   
+[   5]    0052: 45 52 52 4F 52 3A 20 52 45 41 44 20   ErrorMsg db 'ERROR: READ FILE FAILED','$'
+                46 49 4C 45 20 46 41 49 4C 45 44 24 
+                                                    
+[   6]    006A: 1E 00 24 24 24 24 24 24 24 24 24 24   indata db 30,?,30 dup('$')
+                24 24 24 24 24 24 24 24 24 24 24 24 
+                24 24 24 24 24 24 24 24             
+[   7]    008A: 72 65 64 2E 62 6D 70 00               filename db 'red.bmp',0
+[   8]    0092: 00 00                                 filehandle dw ?          ;
+[   9]    0094: 00 00 00 00 00 00 00 00 00 00 00 00   ScrLine db 320 dup (0)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00             
+[  10]    01D4: 00 00 00 00 00 00 00 00 00 00 00 00   imageHeader db 54 dup(?)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00                   
+[  11]    020A: 07 07 07 07 07 07 07 07 07 07 07 07   Palette db 1024 dup(7)
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07 07 07 07 07 07 07 07 07 
+                07 07 07 07                         
+[  12]        :                                       .CODE
+[  13]        :                                       
+[  14]    0610:                                       OpenFile PROC NEAR
+[  15]    0610: B4 3D                                 MOV ah, 3Dh     ; Open file option
+[  16]    0612: 32 C0                                 XOR AL,AL       ; Clear AL
+[  17]    0614: BA 4A 00                              MOV DX, offset filename ; Load filename string offset
+[  18]    0617: CD 21                                 INT 21h
+[  19]    0619: 72 04                                 JC openerror    ; Error opening file
+[  20]    061B: A3 52 00                              MOV [filehandle], AX ; File opened successfully, store in filehandle
+[  21]    061E: C3                                    RET
+[  22]    061F:                                       openerror:
+[  23]    061F: BA 12 00                              MOV DX, offset ErrorMsg
+[  24]    0622: B4 09                                 MOV AH, 9H      ; Display string option
+[  25]    0624: CD 21                                 INT 21h
+[  26]    0626: C3                                    RET
+[  27]        :                                       OpenFile ENDP
+[  28]        :                                       
+[  29]    0627:                                       CloseFile PROC  NEAR
+[  30]    0627: B4 3E                                 MOV AH,3EH ; Close file option
+[  31]    0629: 32 C0                                 XOR AL,AL  ; Clear AL
+[  32]    062B: 8B 1E 52 00                           MOV BX,filehandle ; Load filehandle address
+[  33]    062F: CD 21                                 INT 21H
+[  34]    0631: 72 01                                 JC CloseError
+[  35]    0633: C3                                    RET
+[  36]    0634:                                       CloseError:
+[  37]    0634: BA 12 00                              MOV DX, offset ErrorMsg
+[  38]    0637: B4 09                                 MOV AH, 9H      ; Display string option
+[  39]    0639: CD 21                                 INT 21h
+[  40]    063B: C3                                    RET
+[  41]        :                                       CloseFile ENDP
+[  42]        :                                       
+[  43]    063C:                                       ReadFile PROC NEAR
+[  44]    063C: B4 3F                                 MOV AH, 3FH ; Read from file option
+[  45]    063E: 32 C0                                 XOR AL,AL   ; Clear AL
+[  46]    0640: 8B 1E 52 00                           MOV BX,[filehandle] ; File to read from
+[  47]    0644: BA CA 01                              LEA DX,Palette
+[  48]    0647: B9 00 04                              MOV CX,400H ; Number of bytes to read 1024 bytes -> 256 colors * 4 bytes
+[  49]    064A: CD 21                                 INT 21H
+[  50]    064C: C3                                    RET
+[  51]        :                                       ReadFile ENDP
+[  52]        :                                       
+[  53]    064D:                                       SetPalette PROC NEAR
+[  54]    064D: 60                                    PUSHA
+[  55]    064E: 8B D8                                 MOV BX,AX
+[  56]    0650: B1 02                                 MOV CL,2
+[  57]        :                                       
+[  58]    0652: 8A C6                                 MOV AL,DH
+[  59]    0654: 24 0F                                 AND AL,00001111B
+[  60]    0656: D2 E0                                 SHL AL,CL
+[  61]    0658: 8A E8                                 MOV CH,AL
+[  62]        :                                       
+[  63]    065A: 8A C2                                 MOV AL,DL
+[  64]    065C: 24 F0                                 AND AL,11110000B
+[  65]    065E: D2 E8                                 SHR AL,CL
+[  66]    0660: 8A F0                                 MOV DH,AL
+[  67]        :                                       
+[  68]    0662: 8A C2                                 MOV AL,DL
+[  69]    0664: 24 0F                                 AND AL,00001111B
+[  70]    0666: D2 E0                                 SHL AL,CL
+[  71]    0668: 8A C8                                 MOV CL,AL
+[  72]        :                                       
+[  73]    066A: B7 00                                 MOV BH,0
+[  74]    066C: B8 10 10                              MOV AX,1010H
+[  75]    066F: CD 10                                 INT 10H
+[  76]    0671: 61                                    POPA
+[  77]    0672: C3                                    RET
+[  78]        :                                       SetPalette ENDP
+[  79]        :                                       
+[  80]        :                                       setPixelPalette MACRO index,r,g,b
+[  81]        :                                       mov bx, index
+[  82]        :                                       mov dh, r
+[  83]        :                                       mov ch, g
+[  84]        :                                       mov cl, b
+[  85]        :                                       mov ax, 1010h  ; BIOS.SetIndividualColorRegister
+[  86]        :                                       int 10h
+[  87]        :                                       ENDM setPixelPalette
+[  88]        :                                       
+[  89]    0673:                                       FIXPALETTE PROC NEAR
+[  90]    0673: 60                                    PUSHA
+[  91]    0674: BE CA 01                              LEA SI,Palette
+[  92]    0677: 8B 04                                 MOV AX,[SI]
+[  93]    0679: 26 A3 00 00                           MOV ES:[0],AX
+[  94]        :                                       
+[  95]    067D: 8B 04                                 MOV AX,[SI]
+[  96]        :                                       
+[  97]    067F: E8 CB FF                              CALL SetPalette
+[  98]        :                                       
+[  99]        :                                       
+[ 100]        :                                       
+[ 101]    0682: B9 00 01                              MOV CX,256
+[ 102]        :                                       
+[ 103]    0685:                                       FIX:
+[ 104]    0685: 8B 04                                 MOV AX,[SI]
+[ 105]    0687: E8 C3 FF                              CALL SetPalette
+[ 106]    068A: 83 C6 04                              ADD SI,4
+[ 107]    068D: E2 F6                                 LOOP FIX
+[ 108]        :                                       
+[ 109]    068F: 61                                    POPA
+[ 110]    0690: C3                                    RET
+[ 111]        :                                       FIXPALETTE ENDP
+[ 112]        :                                       
+[ 113]    0691:                                       DrawImage PROC NEAR
+[ 114]    0691: B8 00 A0                              mov ax, 0A000h
+[ 115]    0694: 8E C0                                 mov es, ax
+[ 116]    0696: B9 C8 00                              mov cx,200
+[ 117]    0699:                                       PrintBMPLoop:
+[ 118]    0699: 51                                    push cx
+[ 119]        :                                       ; di = cx*320, point to the correct screen line
+[ 120]    069A: 8B F9                                 mov di,cx
+[ 121]        :                                       
+[ 122]        :                                       ;shift left cx - 6 bits
+[ 123]    069C: D1 E1                                 shl cx,1
+[ 124]    069E: D1 E1                                 shl cx,1
+[ 125]    06A0: D1 E1                                 shl cx,1
+[ 126]    06A2: D1 E1                                 shl cx,1
+[ 127]    06A4: D1 E1                                 shl cx,1
+[ 128]    06A6: D1 E1                                 shl cx,1
+[ 129]        :                                       
+[ 130]        :                                       ;shift left di - 8 bits
+[ 131]    06A8: D1 E7                                 shl di,1
+[ 132]    06AA: D1 E7                                 shl di,1
+[ 133]    06AC: D1 E7                                 shl di,1
+[ 134]    06AE: D1 E7                                 shl di,1
+[ 135]    06B0: D1 E7                                 shl di,1
+[ 136]    06B2: D1 E7                                 shl di,1
+[ 137]    06B4: D1 E7                                 shl di,1
+[ 138]    06B6: D1 E7                                 shl di,1
+[ 139]        :                                       
+[ 140]    06B8: 03 F9                                 add di,cx
+[ 141]        :                                       ; Read one line
+[ 142]    06BA: B4 3F                                 mov ah,3fh
+[ 143]    06BC: B9 40 01                              mov cx,320
+[ 144]    06BF: BA 54 00                              mov dx,offset ScrLine
+[ 145]    06C2: CD 21                                 int 21h
+[ 146]        :                                       ; Copy one line into video memory
+[ 147]    06C4: FC                                    cld ; Clear direction flag, for movsb
+[ 148]    06C5: B9 40 01                              mov cx,320
+[ 149]    06C8: BE 54 00                              mov si,offset ScrLine
+[ 150]        :                                       
+[ 151]    06CB: F3 A4                                 rep movsb ; Copy line to the screen
+[ 152]        :                                       ;rep movsb is same as the following code:
+[ 153]        :                                       ;mov es:di, ds:si
+[ 154]        :                                       ;inc si
+[ 155]        :                                       ;inc di
+[ 156]        :                                       ;dec cx
+[ 157]        :                                       ;loop until cx=0
+[ 158]    06CD: 59                                    pop cx
+[ 159]    06CE: E2 C9                                 loop PrintBMPLoop
+[ 160]    06D0: C3                                    ret
+[ 161]        :                                       ;MOV AX,0A000H
+[ 162]        :                                       ;    MOV ES,AX   ; Extra segment points to Video-RAM
+[ 163]        :                                       ;
+[ 164]        :                                       ;
+[ 165]        :                                       ;    LEA SI,Palette ; Image data in BGR format
+[ 166]        :                                       ;
+[ 167]        :                                       ;    MOV DI,0         ; First pixel pos in vram
+[ 168]        :                                       ;    CLD              ; Increment DI,SI
+[ 169]        :                                       ;    MOV CX,200
+[ 170]        :                                       ;
+[ 171]        :                                       ;    DRAW:
+[ 172]        :                                       ;    PUSH CX
+[ 173]        :                                       ;     push cx
+[ 174]        :                                       ;    ; di = cx*320, point to the correct screen line
+[ 175]        :                                       ;    mov di,cx
+[ 176]        :                                       ;
+[ 177]        :                                       ;    ;shift left cx - 6 bits
+[ 178]        :                                       ;    shl cx,1
+[ 179]        :                                       ;    shl cx,1
+[ 180]        :                                       ;    shl cx,1
+[ 181]        :                                       ;    shl cx,1
+[ 182]        :                                       ;    shl cx,1
+[ 183]        :                                       ;    shl cx,1
+[ 184]        :                                       ;
+[ 185]        :                                       ;    ;shift left di - 8 bits
+[ 186]        :                                       ;    shl di,1
+[ 187]        :                                       ;    shl di,1
+[ 188]        :                                       ;    shl di,1
+[ 189]        :                                       ;    shl di,1
+[ 190]        :                                       ;    shl di,1
+[ 191]        :                                       ;    shl di,1
+[ 192]        :                                       ;    shl di,1
+[ 193]        :                                       ;    shl di,1
+[ 194]        :                                       ;
+[ 195]        :                                       ;    add di,cx
+[ 196]        :                                       ;    mov ah,3fh
+[ 197]        :                                       ;    mov cx,320
+[ 198]        :                                       ;    mov dx,offset ScrLine
+[ 199]        :                                       ;    int 21h
+[ 200]        :                                       ;    MOV CX,160      ; Screen height or lines on screen
+[ 201]        :                                       ;    ; offset = y*320 + x  -> CX * 6 , DI * 8 -->> DI= 8DI + 6CX-->>
+[ 202]        :                                       ;    REP MOVSW
+[ 203]        :                                       ;    POP CX
+[ 204]        :                                       ;    LOOP DRAW
+[ 205]        :                                       ;    RET
+[ 206]        :                                       
+[ 207]        :                                       DrawImage ENDP
+[ 208]        :                                       
+[ 209]        :                                       
+[ 210]    06D1:                                       MAIN PROC FAR
+[ 211]    06D1: B8 04 00                              MOV AX,@DATA
+[ 212]    06D4: 8E D8                                 MOV DS,AX
+[ 213]        :                                       
+[ 214]    06D6: B8 13 00                              MOV AX,13h
+[ 215]    06D9: CD 10                                 INT 10h
+[ 216]    06DB: B8 00 A0                              MOV AX,0A000H
+[ 217]    06DE: 8E C0                                 MOV ES,AX
+[ 218]    06E0: E8 2D FF                              CALL OpenFile
+[ 219]    06E3: E8 56 FF                              CALL ReadFile
+[ 220]    06E6: E8 8A FF                              CALL FIXPALETTE
+[ 221]    06E9: E8 A5 FF                              CALL DrawImage
+[ 222]        :                                       
+[ 223]        :                                       
+[ 224]        :                                       
+[ 225]    06EC: B4 4C                                 MOV AH,04CH
+[ 226]    06EE: B0 00                                 MOV AL,0
+[ 227]    06F0: CD 21                                 INT 21H
+[ 228]        :                                       
+[ 229]        :                                       MAIN ENDP
+[ 230]        :                                       END MAIN
+[ 231]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: F2      -   bytes on last page (l.byte)
+0003: 00      -   bytes on last page (h.byte)
+0004: 05      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 40      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: 30      -   check sum (l.byte)
+0013: 4B      -   check sum (h.byte)
+0014: C1      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 61      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: C2      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 61      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

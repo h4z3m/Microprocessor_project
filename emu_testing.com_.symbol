@@ -1,0 +1,41 @@
+< THE SYMBOL TABLE >  emu_testing.com_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+HEX_CONV                 	00102     	1         	VAR       	(NOSEG)   
+ASCII_RESULT             	00112     	1         	VAR       	(NOSEG)   
+BUFFER                   	00116     	2         	VAR       	(NOSEG)   
+NUM                      	00118     	1         	VAR       	(NOSEG)   
+RES                      	0011C     	2         	VAR       	(NOSEG)   
+DUMMY                    	0011E     	1         	VAR       	(NOSEG)   
+NUM1CPY                  	00122     	1         	VAR       	(NOSEG)   
+NUM1                     	00123     	1         	VAR       	(NOSEG)   
+NUM2                     	00124     	1         	VAR       	(NOSEG)   
+CURRENT_EXEC_OP1         	00125     	2         	VAR       	(NOSEG)   
+CURRENT_EXEC_OP2         	00127     	2         	VAR       	(NOSEG)   
+CODE                     	00129     	-1        	LABEL     	(NOSEG)   
+MAIN                     	00129     	-1        	FAR       	(NOSEG)   
+_8BIT_LOC1TMP            	0014C     	-1        	LABEL     	(NOSEG)   
+_16BIT_LOC1TMP           	00156     	-1        	LABEL     	(NOSEG)   
+DONE_LOC1TMP             	0015E     	-1        	LABEL     	(NOSEG)   
+BYTES_2_LOC2TMP          	00175     	-1        	LABEL     	(NOSEG)   
+DONE_LOC2TMP             	00178     	-1        	LABEL     	(NOSEG)   
+CONVERT_LOC2TMP          	0017E     	-1        	LABEL     	(NOSEG)   
+HEX_LOC2TMP              	0018A     	-1        	LABEL     	(NOSEG)   
+UPPER_LOC2TMP            	0019A     	-1        	LABEL     	(NOSEG)   
+LOWER_LOC2TMP            	001A0     	-1        	LABEL     	(NOSEG)   
+SKIP_LOC2TMP             	001A6     	-1        	LABEL     	(NOSEG)   
+FINISH_LOC2TMP           	001AE     	-1        	LABEL     	(NOSEG)   
+CHECKING_LOC3TMP         	001C0     	-1        	LABEL     	(NOSEG)   
+HEX_LOC3TMP              	001CA     	-1        	LABEL     	(NOSEG)   
+UPPER_LOC3TMP            	001DC     	-1        	LABEL     	(NOSEG)   
+LOWER_LOC3TMP            	001E2     	-1        	LABEL     	(NOSEG)   
+SKIP_LOC3TMP             	001E8     	-1        	LABEL     	(NOSEG)   
+NOT_HEX_LOC3TMP          	001ED     	-1        	LABEL     	(NOSEG)   
+ITS_HEX!                 	001F4     	-1        	LABEL     	(NOSEG)   
+NOT1_HEX                 	001F9     	-1        	LABEL     	(NOSEG)   
+DONE                     	001FE     	-1        	LABEL     	(NOSEG)   
+===================================================================================================
+[ 12/27/2021  --  3:13:47 PM ] 
+< END >
+ 

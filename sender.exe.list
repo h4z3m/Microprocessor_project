@@ -1,0 +1,144 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+sender.exe -- emu8086 assembler version: 4.08  
+ 
+[ 12/28/2021  --  5:57:50 PM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       ; SENDER
+[   2]        :                                       .MODEL SMALL
+[   3]        :                                       .DATA
+[   4]    0000: 1E 00 00 00 00 00 00 00 00 00 00 00   SEND_VALUE 30,?,30 DUP(?)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00             
+[   5]        :                                       .CODE
+[   6]        :                                       SETUP MACRO
+[   7]        :                                       mov ah,6       ; function 6
+[   8]        :                                       mov al,1        ; scroll by 1 line
+[   9]        :                                       mov bh,7       ; normal video attribute
+[  10]        :                                       mov ch,0       ; upper left Y
+[  11]        :                                       mov cl,0        ; upper left X
+[  12]        :                                       mov dh,12     ; lower right Y
+[  13]        :                                       mov dl,79      ; lower right X
+[  14]        :                                       int 10h
+[  15]        :                                       ENDM
+[  16]    0020:                                       SERIAL_INIT PROC
+[  17]        :                                       ; Divisor latch access bit
+[  18]    0020: BA FB 03                              mov dx,3fbh 			; Line Control Register
+[  19]    0023: B0 80                                 mov al,10000000b		;Set Divisor Latch Access Bit
+[  20]    0025: EE                                    out dx,al				;Out it
+[  21]        :                                       ; Set baudrate
+[  22]    0026: BA F8 03                              mov dx,3f8h			
+[  23]    0029: B0 0C                                 mov al,0ch			
+[  24]    002B: EE                                    out dx,al
+[  25]        :                                       ; Set MSB byte of baudrate
+[  26]    002C: BA F9 03                              mov dx,3f9h
+[  27]    002F: B0 00                                 mov al,00h
+[  28]    0031: EE                                    out dx,al
+[  29]        :                                       ; Set port config
+[  30]        :                                       ; 	0:Access to Receiver buffer, Transmitter buffer
+[  31]        :                                       ;	0:Set Break disabled
+[  32]        :                                       ;	011:Even Parity
+[  33]        :                                       ;	0:One Stop Bit
+[  34]        :                                       ;	11:8bits
+[  35]    0032: BA FB 03                              mov dx,3fbh
+[  36]    0035: B0 1B                                 mov al,00011011b
+[  37]    0037: EE                                    out dx,al
+[  38]    0038: C3                                    RET
+[  39]        :                                       SERIAL_INIT ENDP
+[  40]        :                                       read_string MACRO msg
+[  41]        :                                       
+[  42]        :                                       ENDM
+[  43]        :                                       
+[  44]    0039:                                       MAIN PROC FAR
+[  45]    0039: B8 00 00                              MOV AX,@DATA
+[  46]    003C: 8E D8                                 MOV DS,AX
+[  47]        :                                       ;---------------------------
+[  48]        :                                       ; INIT UART
+[  49]    003E: E8 DF FF                              CALL SERIAL_INIT
+[  50]    0041: B4 06 B0 01 B7 07 B5 00 B1 00 B6 0C   SETUP
+                B2 4F CD 10                         
+[  51]        :                                       ; Read string
+[  52]        :                                       
+[  53]    0051: B4 0A                                 MOV AH,0AH
+[  54]    0053: BA 00 00                              LEA DX,SEND_VALUE
+[  55]    0056: CD 21                                 INT 21H
+[  56]        :                                       
+[  57]    0058: BE 02 00                              LEA SI,SEND_VALUE+2
+[  58]    005B: 8A 0E 01 00                           MOV CL,SEND_VALUE+1
+[  59]    005F: FE C9                                 DEC CL
+[  60]    0061:                                       SERIAL_SEND_STRING:
+[  61]        :                                       
+[  62]    0061:                                       AGAIN:  	
+[  63]    0061: EC                                    In al , dx 			;Read Line Status
+[  64]    0062: A8 20                                 		test al , 00100000b
+[  65]    0064: 74 FB                                 		JZ AGAIN                               ;Not empty
+[  66]        :                                       
+[  67]        :                                       ;If empty put the VALUE in Transmit data register
+[  68]    0066: BA F8 03                              		mov dx , 3F8H		; Transmit data register
+[  69]    0069: 8A 04                                 		mov  al,[SI]
+[  70]    006B: 46                                    		INC SI
+[  71]    006C: EE                                    		out dx , al
+[  72]    006D: FE C9                                 DEC CL
+[  73]    006F: 75 F0                                 JNZ SERIAL_SEND_STRING
+[  74]        :                                       
+[  75]    0071:                                       EXIT_PROGRAM:
+[  76]    0071: B0 24                                 mov al,'$'
+[  77]    0073: EE                                    out dx,al
+[  78]        :                                       ; Return control to DOS
+[  79]    0074: B4 4C                                 MOV AH,04CH
+[  80]    0076: 32 C0                                 XOR AL,AL
+[  81]    0078: CD 21                                 INT 21H
+[  82]        :                                       
+[  83]        :                                       MAIN ENDP
+[  84]        :                                       
+[  85]        :                                       END MAIN
+[  86]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 7A      -   bytes on last page (l.byte)
+0003: 00      -   bytes on last page (h.byte)
+0004: 02      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 00      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: 8F      -   check sum (l.byte)
+0013: E9      -   check sum (h.byte)
+0014: 19      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 02      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 1A      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 02      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

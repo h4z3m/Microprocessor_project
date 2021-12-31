@@ -1,0 +1,390 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+disp_image.exe -- emu8086 assembler version: 4.08  
+ 
+[ 12/24/2021  --  1:20:21 AM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .MODEL SMALL
+[   2]        :                                       .STACK 256
+[   3]        :                                       .DATA
+[   4]    0100: 00 00                                 filehandle DW ?
+[   5]    0102: 65 72 72 6F 72 24                     ErrorMsg db 'error$'
+[   6]    0108: 09 00                                 TOP_Y                      dw  9                  ;Y on line drawing in "CleanTopLine" procedure
+[   7]    010A: 00 00 00 00 00 00 00 00 00 00 00 00   ScrLine db  320 dup (0)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00             
+[   8]    024A: 69 6E 64 65 78 2E 62 6D 70 00         filename db 'index.bmp',0
+[   9]    0254: 00 00 00 00 00 00 00 00 00 00 00 00   Header                     db  54 dup (0)         ;BMP
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00                   
+[  10]        :                                       
+[  11]        :                                       SET_PIXEL_COLOR            equ 0ch
+[  12]        :                                       MAX_X                      equ 319
+[  13]    028A: 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E   Palette                    db  256*4 dup (14)                ;maximum x cordinate             ;set pixel color with interrupt     ;BMP
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 
+                0E 0E 0E 0E                         
+[  14]        :                                       .CODE
+[  15]        :                                       ;*******************************************************
+[  16]    0690:                                       proc CleanTopLine
+[  17]    0690: 50                                    push ax
+[  18]    0691: 53                                    push bx
+[  19]    0692: 51                                    push cx
+[  20]    0693: 52                                    push dx
+[  21]    0694: 56                                    push si
+[  22]        :                                       
+[  23]        :                                       ; Clean the to top most line by set all the top line pixels to black
+[  24]    0695: B4 0C                                 mov ah,SET_PIXEL_COLOR      ;for pixel set
+[  25]    0697: B0 00                                 mov al,0                    ;color 0 is black (to erase all pixels in the line)
+[  26]    0699: BB 00 00                              mov bx,0                    ;need to set bh=0h for page number always 0 for 320x200x256 CGA-256
+[  27]    069C: 8B 16 08 00                           mov dx,[TOP_Y]              ;usually set Y=9 from "ScreenMovement"  (or set Y to 0 form "show_bitmap")
+[  28]    06A0: BF 00 00                              mov di,0                    ;pixel X position counter
+[  29]    06A3:                                       LoopClsTop:
+[  30]    06A3: 8B CF                                 mov cx,di                   ;set X
+[  31]    06A5: CD 10                                 int 10h                     ;draw(X, Y) CLS the pixel
+[  32]    06A7: 47                                    inc di                      ;add 1 to X
+[  33]    06A8: 81 FF 3F 01                           cmp di,MAX_X                ;stop when X==319 (since we start from 0 offset)
+[  34]    06AC: 74 02                                 je EndClean
+[  35]    06AE: EB F3                                 jmp LoopClsTop
+[  36]        :                                       
+[  37]    06B0:                                       EndClean:
+[  38]    06B0: 5E                                    pop si
+[  39]    06B1: 5A                                    pop dx
+[  40]    06B2: 59                                    pop cx
+[  41]    06B3: 5B                                    pop bx
+[  42]    06B4: 58                                    pop ax
+[  43]    06B5: C3                                    ret
+[  44]        :                                       endp CleanTopLine
+[  45]        :                                       
+[  46]        :                                       
+[  47]        :                                       
+[  48]        :                                       
+[  49]    06B6:                                       proc OpenFile
+[  50]    06B6: B4 3D                                 mov ah, 3Dh
+[  51]    06B8: 32 C0                                 xor al, al
+[  52]    06BA: BA 4A 01                              mov dx, offset filename
+[  53]    06BD: CD 21                                 int 21h
+[  54]    06BF: 72 04                                 jc openerror
+[  55]    06C1: A3 00 00                              mov [filehandle], ax
+[  56]    06C4: C3                                    ret
+[  57]        :                                       
+[  58]    06C5:                                       openerror:
+[  59]    06C5: BA 02 00                              mov dx, offset ErrorMsg
+[  60]    06C8: B4 09                                 mov ah, 9h
+[  61]    06CA: CD 21                                 int 21h
+[  62]    06CC: C3                                    ret
+[  63]        :                                       endp OpenFile
+[  64]        :                                       
+[  65]        :                                       
+[  66]        :                                       
+[  67]        :                                       
+[  68]    06CD:                                       proc ReadHeader
+[  69]    06CD: B4 3F                                 mov ah,3fh
+[  70]    06CF: 8B 1E 00 00                           mov bx, [filehandle]
+[  71]    06D3: B9 36 00                              mov cx,54
+[  72]    06D6: BA 54 01                              mov dx,offset Header
+[  73]    06D9: CD 21                                 int 21h
+[  74]    06DB: C3                                    ret
+[  75]        :                                       endp ReadHeader
+[  76]        :                                       
+[  77]    06DC:                                       proc ReadPalette
+[  78]    06DC: B4 3F                                 mov ah,3fh
+[  79]    06DE: B9 00 04                              mov cx,400h
+[  80]    06E1: BA 8A 01                              mov dx,offset Palette
+[  81]    06E4: CD 21                                 int 21h
+[  82]    06E6: C3                                    ret
+[  83]        :                                       endp ReadPalette
+[  84]        :                                       
+[  85]        :                                       
+[  86]    06E7:                                       proc CopyPal
+[  87]    06E7: BE 8A 01                              mov si,offset Palette
+[  88]    06EA: B9 00 01                              mov cx,256
+[  89]    06ED: BA C8 03                              mov dx,3C8h
+[  90]    06F0: B0 00                                 mov al,0
+[  91]        :                                       ; Copy starting color to port 3C8h
+[  92]    06F2: EE                                    out dx,al
+[  93]        :                                       ; Copy palette itself to port 3C9h
+[  94]    06F3: 42                                    inc dx
+[  95]    06F4:                                       PalLoop:
+[  96]        :                                       ; Note: Colors in a BMP file are saved as BGR values rather than RGB.
+[  97]    06F4: 8A 44 02                              mov al,[si+2] ; Get red value.
+[  98]    06F7: D0 E8                                 shr al,1 ; Max. is 255, but video palette maximal
+[  99]    06F9: D0 E8                                 shr al,1 ; Max. is 255, but video palette maximal
+[ 100]        :                                       ; value is 63. Therefore dividing by 4.
+[ 101]    06FB: EE                                    out dx,al ; Send it.
+[ 102]    06FC: 8A 44 01                              mov al,[si+1] ; Get green value.
+[ 103]        :                                       
+[ 104]    06FF: D0 E8                                 shr al,1
+[ 105]    0701: D0 E8                                 shr al,1
+[ 106]    0703: EE                                    out dx,al ; Send it.
+[ 107]    0704: 8A 04                                 mov al,[si] ; Get blue value.
+[ 108]        :                                       
+[ 109]    0706: D0 E8                                 shr al,1
+[ 110]    0708: D0 E8                                 shr al,1
+[ 111]    070A: EE                                    out dx,al ; Send it.
+[ 112]    070B: 83 C6 04                              add si,4 ; Point to next color.
+[ 113]        :                                       ; (There is a null chr. after every color.)
+[ 114]        :                                       
+[ 115]    070E: E2 E4                                 loop PalLoop
+[ 116]    0710: C3                                    ret
+[ 117]        :                                       endp CopyPal
+[ 118]        :                                       
+[ 119]        :                                       
+[ 120]    0711:                                       proc CopyBitmap
+[ 121]    0711: B8 00 A0                              mov ax, 0A000h
+[ 122]    0714: 8E C0                                 mov es, ax
+[ 123]    0716: B9 C8 00                              mov cx,200
+[ 124]    0719:                                       PrintBMPLoop:
+[ 125]    0719: 51                                    push cx
+[ 126]        :                                       ; di = cx*320, point to the correct screen line
+[ 127]    071A: 8B F9                                 mov di,cx
+[ 128]        :                                       
+[ 129]        :                                       ;shift left cx - 6 bits
+[ 130]    071C: D1 E1                                 shl cx,1
+[ 131]    071E: D1 E1                                 shl cx,1
+[ 132]    0720: D1 E1                                 shl cx,1
+[ 133]    0722: D1 E1                                 shl cx,1
+[ 134]    0724: D1 E1                                 shl cx,1
+[ 135]    0726: D1 E1                                 shl cx,1
+[ 136]        :                                       
+[ 137]        :                                       ;shift left di - 8 bits
+[ 138]    0728: D1 E7                                 shl di,1
+[ 139]    072A: D1 E7                                 shl di,1
+[ 140]    072C: D1 E7                                 shl di,1
+[ 141]    072E: D1 E7                                 shl di,1
+[ 142]    0730: D1 E7                                 shl di,1
+[ 143]    0732: D1 E7                                 shl di,1
+[ 144]    0734: D1 E7                                 shl di,1
+[ 145]    0736: D1 E7                                 shl di,1
+[ 146]        :                                       
+[ 147]    0738: 03 F9                                 add di,cx
+[ 148]        :                                       ; Read one line
+[ 149]    073A: B4 3F                                 mov ah,3fh
+[ 150]    073C: B9 40 01                              mov cx,320
+[ 151]    073F: BA 0A 00                              mov dx,offset ScrLine
+[ 152]    0742: CD 21                                 int 21h
+[ 153]        :                                       ; Copy one line into video memory
+[ 154]    0744: FC                                    cld ; Clear direction flag, for movsb
+[ 155]    0745: B9 40 01                              mov cx,320
+[ 156]    0748: BE 0A 00                              mov si,offset ScrLine
+[ 157]        :                                       
+[ 158]    074B: F3 A4                                 rep movsb ; Copy line to the screen
+[ 159]        :                                       ;rep movsb is same as the following code:
+[ 160]        :                                       ;mov es:di, ds:si
+[ 161]        :                                       ;inc si
+[ 162]        :                                       ;inc di
+[ 163]        :                                       ;dec cx
+[ 164]        :                                       ;loop until cx=0
+[ 165]    074D: 59                                    pop cx
+[ 166]    074E: E2 C9                                 loop PrintBMPLoop
+[ 167]    0750: C3                                    ret
+[ 168]        :                                       endp CopyBitmap
+[ 169]        :                                       
+[ 170]        :                                       
+[ 171]    0751:                                       proc CloseFile
+[ 172]    0751: B4 3E                                 mov ah,3eh
+[ 173]    0753: 8B 1E 00 00                           mov bx, [filehandle]
+[ 174]    0757: CD 21                                 int 21h
+[ 175]    0759: C3                                    ret
+[ 176]        :                                       endp CloseFile
+[ 177]    075A:                                       proc show_bitmap
+[ 178]    075A: 50                                    push ax
+[ 179]    075B: 53                                    push bx
+[ 180]    075C: 51                                    push cx
+[ 181]    075D: 52                                    push dx
+[ 182]    075E: 56                                    push si
+[ 183]        :                                       
+[ 184]    075F: E8 54 FF                              call OpenFile
+[ 185]    0762: E8 68 FF                              call ReadHeader
+[ 186]    0765: E8 74 FF                              call ReadPalette
+[ 187]    0768: E8 7C FF                              call CopyPal
+[ 188]    076B: E8 A3 FF                              call CopyBitmap
+[ 189]        :                                       
+[ 190]    076E: E8 E0 FF                              call CloseFile
+[ 191]        :                                       
+[ 192]        :                                       ; Clean the to top most line by set all the top line pixels to black
+[ 193]    0771: B8 00 00                              mov ax,0
+[ 194]    0774: A3 08 00                              mov [TOP_Y],ax
+[ 195]    0777: E8 16 FF                              call CleanTopLine
+[ 196]        :                                       
+[ 197]        :                                       
+[ 198]    077A: 5E                                    pop si
+[ 199]    077B: 5A                                    pop dx
+[ 200]    077C: 59                                    pop cx
+[ 201]    077D: 5B                                    pop bx
+[ 202]    077E: 58                                    pop ax
+[ 203]    077F: C3                                    ret
+[ 204]        :                                       endp show_bitmap
+[ 205]    0780:                                       main proc far
+[ 206]    0780: B8 10 00                              MOV AX,@DATA
+[ 207]    0783: 8E D8                                 MOV DS,AX
+[ 208]    0785: B4 00                                 mov ah,0
+[ 209]    0787: B0 13                                 MOV Al,13h
+[ 210]    0789: CD 10                                 INT 10h
+[ 211]    078B: B8 13 00                              mov ax,13h   ; for 320x200x256 "CGA 256" colors (13h)
+[ 212]    078E: B7 00                                 mov bh,0h                   ;bh=0 page number always 0 for 320x200x256 CGA-256
+[ 213]    0790: CD 10                                 int 10h
+[ 214]    0792: E8 C5 FF                              call show_bitmap
+[ 215]        :                                       
+[ 216]        :                                       
+[ 217]        :                                       endp main
+[ 218]        :                                       
+[ 219]        :                                       end main
+[ 220]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 95      -   bytes on last page (l.byte)
+0003: 01      -   bytes on last page (h.byte)
+0004: 05      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 00      -   SP - stack pointer (l.byte)
+0011: 01      -   SP - stack pointer (h.byte)
+0012: 56      -   check sum (l.byte)
+0013: DB      -   check sum (h.byte)
+0014: F0      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 69      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: F1      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 69      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

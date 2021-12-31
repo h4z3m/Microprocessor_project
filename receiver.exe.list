@@ -1,0 +1,160 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+receiver.exe -- emu8086 assembler version: 4.08  
+ 
+[ 12/28/2021  --  5:52:39 PM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       ; RECEIVER
+[   2]        :                                       .MODEL SMALL
+[   3]        :                                       .DATA
+[   4]    0000: 00 00 00 00 00 00 00 00 00 00 00 00   REC_VALUE 30 DUP(?)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00                   
+[   5]        :                                       .CODE
+[   6]        :                                       SETUP MACRO
+[   7]        :                                       mov ah,6       ; function 6
+[   8]        :                                       mov al,1        ; scroll by 1 line
+[   9]        :                                       mov bh,7       ; normal video attribute
+[  10]        :                                       mov ch,0       ; upper left Y
+[  11]        :                                       mov cl,0        ; upper left X
+[  12]        :                                       mov dh,12     ; lower right Y
+[  13]        :                                       mov dl,79      ; lower right X
+[  14]        :                                       int 10h
+[  15]        :                                       
+[  16]        :                                       ENDM
+[  17]    0020:                                       SERIAL_INIT PROC
+[  18]        :                                       ; Divisor latch access bit
+[  19]    0020: BA FB 03                              mov dx,3fbh 			; Line Control Register
+[  20]    0023: B0 80                                 mov al,10000000b		;Set Divisor Latch Access Bit
+[  21]    0025: EE                                    out dx,al				;Out it
+[  22]        :                                       ; Set baudrate
+[  23]    0026: BA F8 03                              mov dx,3f8h			
+[  24]    0029: B0 0C                                 mov al,0ch			
+[  25]    002B: EE                                    out dx,al
+[  26]        :                                       ; Set MSB byte of baudrate
+[  27]    002C: BA F9 03                              mov dx,3f9h
+[  28]    002F: B0 00                                 mov al,00h
+[  29]    0031: EE                                    out dx,al
+[  30]        :                                       ; Set port config
+[  31]        :                                       ; 	0:Access to Receiver buffer, Transmitter buffer
+[  32]        :                                       ;	0:Set Break disabled
+[  33]        :                                       ;	011:Even Parity
+[  34]        :                                       ;	0:One Stop Bit
+[  35]        :                                       ;	11:8bits
+[  36]    0032: BA FB 03                              mov dx,3fbh
+[  37]    0035: B0 1B                                 mov al,00011011b
+[  38]    0037: EE                                    out dx,al
+[  39]    0038: C3                                    RET
+[  40]        :                                       SERIAL_INIT ENDP
+[  41]        :                                       
+[  42]        :                                       
+[  43]    0039:                                       MAIN PROC FAR
+[  44]    0039: B8 00 00                              MOV AX,@DATA
+[  45]    003C: 8E D8                                 MOV DS,AX
+[  46]        :                                       ;---------------------------
+[  47]        :                                       ; INIT UART
+[  48]    003E: E8 DF FF                              CALL SERIAL_INIT
+[  49]    0041: B4 06 B0 01 B7 07 B5 00 B1 00 B6 0C   SETUP
+                B2 4F CD 10                         
+[  50]    0051:                                       START:
+[  51]        :                                       
+[  52]        :                                       ; READ ESCAPE KEY
+[  53]    0051: B4 01                                 MOV AH,1
+[  54]    0053: B0 00                                 MOV AL,0
+[  55]    0055: CD 16                                 INT 16H
+[  56]    0057: 74 05                                 JZ NoKey
+[  57]    0059: 80 FC 01                              CMP AH,1
+[  58]    005C: 74 28                                 JZ EXIT_PROGRAM
+[  59]    005E:                                       NoKey:
+[  60]        :                                       ; FLUSH BUFFER
+[  61]    005E: B4 0C                                 MOV AH,0CH
+[  62]    0060: B0 00                                 MOV AL,0
+[  63]    0062: CD 21                                 INT 21H
+[  64]        :                                       ;Check that Data is Ready
+[  65]    0064: BA FD 03                              		mov dx , 3FDH		; Line Status Register
+[  66]        :                                       	
+[  67]    0067: BE 00 00                              	LEA SI,REC_VALUE
+[  68]    006A: 4E                                    	DEC SI
+[  69]    006B:                                       	SERIAL_RECEIVE_STRING:
+[  70]    006B: 46                                    	INC SI
+[  71]    006C:                                       	CHK:	
+[  72]    006C: EC                                    	    in al , dx
+[  73]    006D: A8 01                                 		test al , 1
+[  74]    006F: 74 FB                                 	JZ CHK                                    ;Not Ready
+[  75]        :                                       ;If Ready read the VALUE in Receive data register
+[  76]    0071: BA F8 03                              		mov dx , 03F8H
+[  77]    0074: EC                                    		in al , dx
+[  78]    0075: 88 04                                 		mov  [SI], al
+[  79]        :                                       		
+[  80]        :                                       		
+[  81]    0077: 3C 24                                 CMP al,'$'
+[  82]    0079: 75 F0                                 JNZ SERIAL_RECEIVE_STRING
+[  83]        :                                       
+[  84]    007B: C6 04 24                              MOV [SI],'$'
+[  85]        :                                       	; DISPLAY STRING
+[  86]    007E: B4 02                                 mov ah,2
+[  87]    0080: 8A 16 00 00                           mov dl,REC_VALUE
+[  88]    0084: CD 21                                 int 21h
+[  89]        :                                       
+[  90]        :                                       
+[  91]        :                                       
+[  92]    0086:                                       EXIT_PROGRAM:
+[  93]        :                                       
+[  94]        :                                       ; Return control to DOS
+[  95]    0086: B4 4C                                 MOV AH,04CH
+[  96]    0088: 32 C0                                 XOR AL,AL
+[  97]    008A: CD 21                                 INT 21H
+[  98]        :                                       
+[  99]        :                                       MAIN ENDP
+[ 100]        :                                       
+[ 101]        :                                       END MAIN
+[ 102]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 8C      -   bytes on last page (l.byte)
+0003: 00      -   bytes on last page (h.byte)
+0004: 02      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 00      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: F4      -   check sum (l.byte)
+0013: 2D      -   check sum (h.byte)
+0014: 19      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 02      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 1A      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 02      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

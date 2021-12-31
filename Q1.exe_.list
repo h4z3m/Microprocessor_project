@@ -1,0 +1,209 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+Q1.exe_ -- emu8086 assembler version: 4.08  
+ 
+[ 12/29/2021  --  4:05:09 PM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       .MODEL SMALL
+[   2]        :                                       .STACK 64
+[   3]        :                                       .DATA
+[   4]    0040: 05 00                                 COUNT DW 5
+[   5]    0042: 01 02 03 04 05 06 07 08 09 0A 0B 0C   ARRAY1 DB 1,2,3,4,5,6,7,8,9,10,11,12
+                                                    
+[   6]    004E: 01 02 03 04 05 06 07 08 09 0A 0B 0C   ARRAY2 DB 1,2,3,4,5,6,7,8,9,10,11,12
+                                                    
+[   7]    005A: 00 00                                 WORDPTR DW ?
+[   8]        :                                       NUMBER_SIZE EQU 2
+[   9]    005C: 03 00 00 00 00                        NUM DB 3,?, 3 dup(0)
+[  10]    0061: 00 00 00 00 00 00 00 00 00 00 00 00   NUMCONVERTED DB 30 DUP(0)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00                   
+[  11]    007F: 45 6E 74 65 72 20 41 3A 20 24         MSGA DB "Enter A: $"
+[  12]    0089: 45 6E 74 65 72 20 42 3A 20 24         MSGB DB "Enter B: $"
+[  13]    0093: 00                                    CURRENT_MAX_DIV DB 0
+[  14]    0094: 00                                    MAX_DIV DB 0
+[  15]    0095: 00                                    INDEX DB 0
+[  16]        :                                       .CODE
+[  17]        :                                       ;
+[  18]        :                                       NEWLINE MACRO
+[  19]        :                                       mov ah,2
+[  20]        :                                       mov dl,10
+[  21]        :                                       int 21h
+[  22]        :                                       mov ah,2
+[  23]        :                                       mov dl,13
+[  24]        :                                       int 21h
+[  25]        :                                       ENDM NEWLINE
+[  26]        :                                       
+[  27]        :                                       PRINT_LINES MACRO
+[  28]        :                                       MOV CL,COUNT
+[  29]        :                                       
+[  30]        :                                       LEA SI,ANUM
+[  31]        :                                       GET_NUMBER:
+[  32]        :                                       ; PRINT
+[  33]        :                                       
+[  34]        :                                       ; GET NUMBER FROM USER
+[  35]        :                                       PUSHA
+[  36]        :                                       MOV BH,0
+[  37]        :                                       GET_DECIMAL A,SI
+[  38]        :                                       POPA
+[  39]        :                                       INC SI
+[  40]        :                                       NEWLINE
+[  41]        :                                       DEC CL
+[  42]        :                                       JNZ GET_NUMBER
+[  43]        :                                       
+[  44]        :                                       ENDM PRINT_LINES
+[  45]        :                                       GET_DECIMAL MACRO NUM,NUMCONVERTED
+[  46]        :                                       LOCAL CONVERT,CONVERTWHOLE
+[  47]        :                                       ;READ NUMBER FROM USER 00-99
+[  48]        :                                       MOV AH,0AH
+[  49]        :                                       LEA DX,NUM
+[  50]        :                                       INT 21H
+[  51]        :                                       ;CONVERT FROM ASCII TO DECIMAL NUMBER
+[  52]        :                                       LEA SI,NUM+3
+[  53]        :                                       MOV CX,NUMBER_SIZE
+[  54]        :                                       MOV BL,1
+[  55]        :                                       CONVERT:
+[  56]        :                                       MOV AL,[SI] ; Get least significant digit
+[  57]        :                                       SUB AL,30H  ; Convert to decimal
+[  58]        :                                       MUL BL      ; Get exponent
+[  59]        :                                       MOV [SI],AL ; Write back result
+[  60]        :                                       MOV AL,BL   ; Multiply BL * 10
+[  61]        :                                       MOV BH,10
+[  62]        :                                       MUL BH
+[  63]        :                                       MOV BL,AL
+[  64]        :                                       DEC SI      ; Get next higher significant digit
+[  65]        :                                       LOOP CONVERT
+[  66]        :                                       ;CONVERT FROM DECIMAL TO WHOLE DECIMAL 10,8 -> 18
+[  67]        :                                       MOV CX,(NUMBER_SIZE-1)
+[  68]        :                                       LEA SI,NUM+3
+[  69]        :                                       MOV DI,NUMCONVERTED
+[  70]        :                                       CONVERTWHOLE:
+[  71]        :                                       MOV AL,[SI] ;Get first num
+[  72]        :                                       DEC SI
+[  73]        :                                       MOV BL,[SI] ;Get second num
+[  74]        :                                       MOV DL,[DI] ;Get previous sum
+[  75]        :                                       ADD DL,BL
+[  76]        :                                       ADD DL,AL   ; DL = AL + BL + DL
+[  77]        :                                       MOV [DI],DL ; Write back result and repeat
+[  78]        :                                       LOOP CONVERTWHOLE
+[  79]        :                                       MOV DI,NUMCONVERTED
+[  80]        :                                       ENDM GET_DECIMAL
+[  81]    00A0:                                       MAIN PROC FAR
+[  82]    00A0: B8 04 00                              MOV AX,@DATA
+[  83]    00A3: 8E D8                                 MOV DS,AX
+[  84]        :                                       
+[  85]    00A5: 8B 0E 00 00                           MOV CX,COUNT
+[  86]    00A9: BE 21 00                              LEA SI,NUMCONVERTED
+[  87]    00AC: 89 36 1A 00                           MOV WORDPTR,SI
+[  88]    00B0:                                       GET_NUMBERS:
+[  89]        :                                       
+[  90]    00B0: 60                                    PUSHA
+[  91]    00B1: B4 0A BA 1C 00 CD 21 BE 1F 00 B9 02   GET_DECIMAL NUM,WORDPTR
+                00 B3 01 8A 04 2C 30 F6 E3 88 04 8A 
+                C3 B7 0A F6 E7 8A D8 4E E2 ED B9 01 
+                00 BE 1F 00 8B 3E 1A 00 8A 04 4E 8A 
+                1C 8A 15 02 D3 02 D0 88 15 E2 F1 8B 
+                3E 1A 00                            
+[  92]    00F0: 61                                    POPA
+[  93]    00F1: FF 06 1A 00                           INC WORDPTR
+[  94]    00F5: E2 B9                                 LOOP GET_NUMBERS
+[  95]        :                                       ; LOOP ON ALL NUMBERS AND FIND COMMON DIVISIORS
+[  96]    00F7: 8B 0E 00 00                           MOV CX,COUNT
+[  97]    00FB: BE 21 00                              LEA SI,NUMCONVERTED
+[  98]        :                                       
+[  99]    00FE:                                       CHECK_DIV:
+[ 100]    00FE: B4 00                                 MOV AH,0
+[ 101]        :                                       ; GET NUMBERS
+[ 102]    0100: 51                                    PUSH CX
+[ 103]    0101: 8B 0E 00 00                           MOV CX,COUNT
+[ 104]        :                                       
+[ 105]    0105: BF 21 00                              LEA DI,NUMCONVERTED
+[ 106]    0108: C6 06 53 00 00                        MOV CURRENT_MAX_DIV,0
+[ 107]    010D:                                       ALL_NUM_LOOPS:
+[ 108]    010D: BE 21 00                              LEA SI,NUMCONVERTED
+[ 109]    0110: 8A 04                                 MOV AL,[SI]
+[ 110]    0112: 8A 1D                                 MOV BL,[DI]
+[ 111]        :                                       ; DIVIDE HERE
+[ 112]    0114: 3A C3                                 CMP AL,BL
+[ 113]    0116: 72 0B                                 JB NOT_DIVISIBLE
+[ 114]    0118: F6 F3                                 DIV BL
+[ 115]    011A: 80 FC 00                              CMP AH,00
+[ 116]    011D: 75 04                                 JNZ NOT_DIVISIBLE
+[ 117]    011F: FE 06 53 00                           INC CURRENT_MAX_DIV
+[ 118]    0123:                                       NOT_DIVISIBLE:
+[ 119]        :                                       
+[ 120]    0123: 47                                    INC DI
+[ 121]    0124: E2 E7                                 LOOP ALL_NUM_LOOPS
+[ 122]        :                                       ; SET NEW MAX
+[ 123]    0126: A0 54 00                              MOV AL,MAX_DIV
+[ 124]    0129: 3A 06 53 00                           CMP AL,CURRENT_MAX_DIV
+[ 125]    012D: 77 0C                                 JA NOT_NEW_MAX
+[ 126]    012F: A0 53 00                              MOV AL,CURRENT_MAX_DIV
+[ 127]        :                                       
+[ 128]    0132: A2 54 00                              MOV MAX_DIV,AL
+[ 129]    0135: 8A 1C                                 mov bl,[si]
+[ 130]    0137: 88 1E 55 00                           MOV INDEX,bl
+[ 131]    013B:                                       NOT_NEW_MAX:
+[ 132]    013B: 46                                    INC SI
+[ 133]    013C: 59                                    POP CX
+[ 134]    013D: E2 BF                                 LOOP CHECK_DIV
+[ 135]        :                                       
+[ 136]        :                                       
+[ 137]        :                                       
+[ 138]        :                                       
+[ 139]        :                                       
+[ 140]        :                                       
+[ 141]        :                                       
+[ 142]        :                                       
+[ 143]        :                                       MAIN ENDP
+[ 144]        :                                       END MAIN
+[ 145]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 3F      -   bytes on last page (l.byte)
+0003: 01      -   bytes on last page (h.byte)
+0004: 02      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 40      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: 13      -   check sum (l.byte)
+0013: 21      -   check sum (h.byte)
+0014: 00      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 0A      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 01      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 0A      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

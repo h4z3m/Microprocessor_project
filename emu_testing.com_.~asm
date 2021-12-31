@@ -1,0 +1,324 @@
+.model tiny
+.stack 64
+.data
+HEX_CONV DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+ascii_result db 4 dup(?)
+buffer dw ?
+num db 'e2cD'
+res dw ?
+dummy db '9F1a'
+num1cpy DB 10000111B
+num1 DB 10000111B
+num2 DB 00100011B
+current_exec_op1  dw 0
+current_exec_op2  dw 0
+.code
+ConvertToDecimal MACRO var,len,buffer,result
+LOCAL CONVERT,HEX,FINISH,SKIP,SKIP2,BYTES_2, DONE,UPPER,LOWER
+
+MOV CH,len  ; Size of variable (1 or 2 bytes)
+SHL CH,1    ; Multiply by 2 -> since we need to loop 4 times if 2 bytes (FFFF) or 2 times if 1 byte (FF)
+MOV CL,4
+LEA BX,var
+MOV AX,len
+CMP AX,2
+JZ BYTES_2
+MOV DX,16   ; Variable is 1 byte so max divisor is 16 (16^1)
+JMP DONE
+BYTES_2:
+MOV DX,4096 ; Variable is 2 bytes so max divisor is 4096 (16^3)
+DONE:
+
+MOV buffer,0; Clear buffer first
+
+CONVERT:
+;16^= 4096  256   16      1
+;var= F      F     F      F
+;BX = 0      1     2      3
+;SHL= 2      4     4      x
+MOV AH,0    ; Clear AH before multiplication
+MOV AL,[BX] ; Get first character
+
+;Check if number
+SUB AL,48
+CMP AL,9 ;57-48
+JG HEX
+;ELSE-> NUMBER FROM 0-9
+JMP SKIP
+;-------HEXADECIMAL CASE FOR UPPER OR LOWER CASE LETTERS-------;
+HEX:
+ADD AL,48
+
+;CHECK IF UPPERCASE OR LOWER
+SUB AL,65
+CMP AL,15  ;70-65
+JBE UPPER
+ADD AL,65
+
+SUB AL,97
+CMP AL,5 ; 102-97
+JBE LOWER
+
+UPPER:
+ADD AL,70
+SUB AL,60 ; 70-10
+JMP SKIP
+LOWER:
+ADD AL,97
+SUB AL,87 ; 97 - 10
+JMP SKIP
+SKIP:
+PUSH DX     ; Backup DX since it will change during multiplication
+MUL DX      ; Multiply by 16^CX
+POP DX      ; Retrieve old value of DX
+ADD buffer,AX ; Buffer = AX + oldBuffer
+FINISH:
+; Divide DL by BL
+SHR DX,CL    ; Divide divisor by 16 (2^4)
+INC BX      ; Get next character
+DEC  CH     ; Decrement counter
+JNZ CONVERT
+; Move final result to destination
+MOV AX,buffer
+MOV result,AX
+ENDM
+
+
+
+CHECK_HEX MACRO var,len
+LOCAL HEX,NOT_HEX,LOWER,UPPER,SKIP,CHECKING
+LEA SI,dummy ; Pointer to number
+MOV CL,4    ; Length of number (2/4 chars.)
+CHECKING:
+MOV AL,[SI]
+;Check if number
+SUB AL,48
+CMP AL,9 ;57-48
+JA HEX
+;ELSE-> NUMBER FROM 0-9
+JMP SKIP
+;-------HEXADECIMAL CASE FOR UPPER OR LOWER CASE LETTERS-------;
+HEX:
+ADD AL,48
+
+;CHECK IF UPPERCASE OR LOWER
+SUB AL,65
+CMP AL,15  ;70-65
+JBE UPPER
+ADD AL,65
+
+SUB AL,97
+CMP AL,5 ; 102-97
+JBE LOWER
+JMP NOT_HEX
+UPPER:
+ADD AL,70
+SUB AL,60 ; 70-10
+JMP SKIP
+LOWER:
+ADD AL,97
+SUB AL,87 ; 97 - 10
+JMP SKIP
+SKIP:
+INC SI
+DEC CL
+JNZ CHECKING
+NOT_HEX:
+CMP CL,0      ; To check if hex, CL should be zero, so ZF = 1
+ENDM
+XOR_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV BL,[di]
+XOR AL,BL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV BX,[di]
+XOR AX,BX
+MOV [SI],AX
+DONE:
+ENDM
+AND_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV BL,[di]
+AND AL,BL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV BX,[di]
+AND AX,BX
+MOV [SI],AX
+DONE:
+ENDM
+OR_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV BL,[di]
+OR AL,BL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV BX,[di]
+OR AX,BX
+MOV [SI],AX
+DONE:
+ENDM
+SHL_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+SHL AL,CL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+SHL AX,CL
+MOV [SI],AX
+DONE:
+ENDM
+SHr_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+SHR AL,CL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+SHR AX,CL
+MOV [SI],AX
+DONE:
+ENDM
+SAR_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+SAR AL,CL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+SAR AX,CL
+MOV [SI],AX
+DONE:
+ENDM
+ROR_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+ROR AL,CL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+ROR AX,CL
+MOV [SI],AX
+DONE:
+ENDM
+ROL_INSTRUCTION MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+ROL AL,CL
+MOV BYTE PTR [SI],AL
+JMP DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+ROL AX,CL
+MOV [SI],AX
+DONE:
+ENDM
+
+
+main proc far
+mov ax,@data
+mov ds,ax
+mov ax,0ff1Ch
+
+
+LEA AX,num1
+LEA BX,num2
+MOV current_exec_op1,AX
+MOV current_exec_op2,BX
+
+;CHECK WIDTH OF REGISTER
+MOV cl,1
+SAR_INSTRUCTION cl
+hlt
+
+
+ConvertToDecimal dummy,2,buffer,res
+
+CHECK_HEX dummy,2
+JZ ITS_HEX!
+JNZ NOT1_HEX
+
+ITS_HEX!:
+MOV AX,0FFFFH
+JMP DONE
+
+NOT1_HEX:
+MOV AX,0DDDDH
+JMP DONE
+DONE:
+main endp
+; AND AX,49
+; MOV AX,[5]
+;    current_exec_op1 = contents of ax
+;    current_exec_op2 = contents of addr 5
+
+end main
+
+
+
+; [SOURCE]: C:\EMU8086\MySource\emu_testing.asm

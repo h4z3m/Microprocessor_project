@@ -1,0 +1,32 @@
+< THE SYMBOL TABLE >  disp_image.exe_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00010     	-5        	SEGMENT   	(ITSELF)  
+FILEHANDLE               	00000     	2         	VAR       	data      
+ERRORMSG                 	00002     	1         	VAR       	data      
+TOP_Y                    	00008     	2         	VAR       	data      
+SCRLINE                  	0000A     	1         	VAR       	data      
+FILENAME                 	0014A     	1         	VAR       	data      
+HEADER                   	00154     	1         	VAR       	data      
+PALETTE                  	0018A     	1         	VAR       	data      
+CODE                     	00069     	-5        	SEGMENT   	(ITSELF)  
+CLEANTOPLINE             	00000     	-1        	NEAR      	code      
+LOOPCLSTOP               	00013     	-1        	LABEL     	code      
+ENDCLEAN                 	00020     	-1        	LABEL     	code      
+OPENFILE                 	00026     	-1        	NEAR      	code      
+OPENERROR                	00035     	-1        	LABEL     	code      
+READHEADER               	0003D     	-1        	NEAR      	code      
+READPALETTE              	0004C     	-1        	NEAR      	code      
+COPYPAL                  	00057     	-1        	NEAR      	code      
+PALLOOP                  	00064     	-1        	LABEL     	code      
+COPYBITMAP               	00081     	-1        	NEAR      	code      
+PRINTBMPLOOP             	00089     	-1        	LABEL     	code      
+CLOSEFILE                	000C1     	-1        	NEAR      	code      
+SHOW_BITMAP              	000CA     	-1        	NEAR      	code      
+MAIN                     	000F0     	-1        	FAR       	code      
+===================================================================================================
+[ 12/24/2021  --  1:44:03 AM ] 
+< END >
+ 

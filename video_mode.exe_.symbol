@@ -1,0 +1,29 @@
+< THE SYMBOL TABLE >  video_mode.exe_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00004     	-5        	SEGMENT   	(ITSELF)  
+MESSAGE                  	00000     	1         	VAR       	data      
+ERRORMSG                 	00012     	1         	VAR       	data      
+INDATA                   	0002A     	1         	VAR       	data      
+FILENAME                 	0004A     	1         	VAR       	data      
+FILEHANDLE               	00052     	2         	VAR       	data      
+SCRLINE                  	00054     	1         	VAR       	data      
+IMAGEHEADER              	00194     	1         	VAR       	data      
+PALETTE                  	001CA     	1         	VAR       	data      
+CODE                     	00061     	-5        	SEGMENT   	(ITSELF)  
+OPENFILE                 	00000     	-1        	NEAR      	code      
+OPENERROR                	0000F     	-1        	LABEL     	code      
+CLOSEFILE                	00017     	-1        	NEAR      	code      
+CLOSEERROR               	00024     	-1        	LABEL     	code      
+READFILE                 	0002C     	-1        	NEAR      	code      
+SETPALETTE               	0003D     	-1        	NEAR      	code      
+FIXPALETTE               	00063     	-1        	NEAR      	code      
+FIX                      	0006D     	-1        	LABEL     	code      
+DRAWIMAGE                	0007C     	-1        	NEAR      	code      
+MAIN                     	00091     	-1        	FAR       	code      
+===================================================================================================
+[ 12/24/2021  --  1:35:37 AM ] 
+< END >
+ 

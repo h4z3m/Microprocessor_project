@@ -1,0 +1,102 @@
+; RECEIVER
+.MODEL SMALL
+.DATA
+REC_VALUE 30 DUP(?)
+.CODE
+SETUP MACRO
+mov ah,6       ; function 6
+mov al,1        ; scroll by 1 line
+mov bh,7       ; normal video attribute
+mov ch,0       ; upper left Y
+mov cl,0        ; upper left X
+mov dh,12     ; lower right Y
+mov dl,79      ; lower right X
+int 10h
+
+ENDM
+SERIAL_INIT PROC
+; Divisor latch access bit
+mov dx,3fbh             ; Line Control Register
+mov al,10000000b        ;Set Divisor Latch Access Bit
+out dx,al                ;Out it
+; Set baudrate
+mov dx,3f8h
+mov al,0ch
+out dx,al
+; Set MSB byte of baudrate
+mov dx,3f9h
+mov al,00h
+out dx,al
+; Set port config
+;     0:Access to Receiver buffer, Transmitter buffer
+;    0:Set Break disabled
+;    011:Even Parity
+;    0:One Stop Bit
+;    11:8bits
+mov dx,3fbh
+mov al,00011011b
+out dx,al
+RET
+SERIAL_INIT ENDP
+
+
+MAIN PROC FAR
+MOV AX,@DATA
+MOV DS,AX
+;---------------------------
+; INIT UART
+CALL SERIAL_INIT
+SETUP
+START:
+
+; READ ESCAPE KEY
+MOV AH,1
+MOV AL,0
+INT 16H
+JZ NoKey
+CMP AH,1
+JZ EXIT_PROGRAM
+NoKey:
+; FLUSH BUFFER
+MOV AH,0CH
+MOV AL,0
+INT 21H
+;Check that Data is Ready
+mov dx , 3FDH        ; Line Status Register
+
+LEA SI,REC_VALUE
+SERIAL_RECEIVE_STRING:
+CHK:
+in al , dx
+test al , 1
+JZ CHK                                    ;Not Ready
+;If Ready read the VALUE in Receive data register
+mov dx , 03F8H
+in al , dx
+mov  [SI], al
+INC SI
+
+CMP [SI],'$'
+JNZ CHK
+MOV [SI],'$'
+; DISPLAY STRING
+mov ah,2
+mov dl,REC_VALUE
+int 21h
+
+
+
+EXIT_PROGRAM:
+
+; Return control to DOS
+MOV AH,04CH
+XOR AL,AL
+INT 21H
+
+MAIN ENDP
+
+END MAIN
+
+
+
+; [SOURCE]: C:\Users\h4z3m\Desktop\Serial_Lab\receiver.asm

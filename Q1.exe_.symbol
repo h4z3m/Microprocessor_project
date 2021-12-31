@@ -1,0 +1,30 @@
+< THE SYMBOL TABLE >  Q1.exe_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00004     	-5        	SEGMENT   	(ITSELF)  
+COUNT                    	00000     	2         	VAR       	data      
+ARRAY1                   	00002     	1         	VAR       	data      
+ARRAY2                   	0000E     	1         	VAR       	data      
+WORDPTR                  	0001A     	2         	VAR       	data      
+NUM                      	0001C     	1         	VAR       	data      
+NUMCONVERTED             	00021     	1         	VAR       	data      
+MSGA                     	0003F     	1         	VAR       	data      
+MSGB                     	00049     	1         	VAR       	data      
+CURRENT_MAX_DIV          	00053     	1         	VAR       	data      
+MAX_DIV                  	00054     	1         	VAR       	data      
+INDEX                    	00055     	1         	VAR       	data      
+CODE                     	0000A     	-5        	SEGMENT   	(ITSELF)  
+MAIN                     	00000     	-1        	FAR       	code      
+GET_NUMBERS              	00010     	-1        	LABEL     	code      
+CONVERT_LOC1TMP          	00020     	-1        	LABEL     	code      
+CONVERTWHOLE_LOC1TMP     	0003D     	-1        	LABEL     	code      
+CHECK_DIV                	0005E     	-1        	LABEL     	code      
+ALL_NUM_LOOPS            	0006D     	-1        	LABEL     	code      
+NOT_DIVISIBLE            	00083     	-1        	LABEL     	code      
+NOT_NEW_MAX              	0009B     	-1        	LABEL     	code      
+===================================================================================================
+[ 12/29/2021  --  4:05:09 PM ] 
+< END >
+ 

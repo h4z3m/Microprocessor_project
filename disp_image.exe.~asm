@@ -1,0 +1,223 @@
+.MODEL SMALL
+.STACK 256
+.DATA
+filehandle DW ?
+ErrorMsg db 'error$'
+TOP_Y                      dw  9                  ;Y on line drawing in "CleanTopLine" procedure
+ScrLine db  320 dup (0)
+filename db 'index.bmp',0
+Header                     db  54 dup (0)         ;BMP
+
+SET_PIXEL_COLOR            equ 0ch
+MAX_X                      equ 319
+Palette                    db  256*4 dup (14)                ;maximum x cordinate             ;set pixel color with interrupt     ;BMP
+.CODE
+;*******************************************************
+proc CleanTopLine
+push ax
+push bx
+push cx
+push dx
+push si
+
+; Clean the to top most line by set all the top line pixels to black
+mov ah,SET_PIXEL_COLOR      ;for pixel set
+mov al,0                    ;color 0 is black (to erase all pixels in the line)
+mov bx,0                    ;need to set bh=0h for page number always 0 for 320x200x256 CGA-256
+mov dx,[TOP_Y]              ;usually set Y=9 from "ScreenMovement"  (or set Y to 0 form "show_bitmap")
+mov di,0                    ;pixel X position counter
+LoopClsTop:
+mov cx,di                   ;set X
+int 10h                     ;draw(X, Y) CLS the pixel
+inc di                      ;add 1 to X
+cmp di,MAX_X                ;stop when X==319 (since we start from 0 offset)
+je EndClean
+jmp LoopClsTop
+
+EndClean:
+pop si
+pop dx
+pop cx
+pop bx
+pop ax
+ret
+endp CleanTopLine
+
+
+
+
+proc OpenFile
+mov ah, 3Dh
+xor al, al
+mov dx, offset filename
+int 21h
+jc openerror
+mov [filehandle], ax
+ret
+
+openerror:
+mov dx, offset ErrorMsg
+mov ah, 9h
+int 21h
+ret
+endp OpenFile
+
+
+
+
+proc ReadHeader
+mov ah,3fh
+mov bx, [filehandle]
+mov cx,54
+mov dx,offset Header
+int 21h
+ret
+endp ReadHeader
+
+proc ReadPalette
+mov ah,3fh
+mov cx,400h
+mov dx,offset Palette
+int 21h
+ret
+endp ReadPalette
+
+
+proc CopyPal
+mov si,offset Palette
+mov cx,256
+mov dx,3C8h
+mov al,0
+; Copy starting color to port 3C8h
+out dx,al
+; Copy palette itself to port 3C9h
+inc dx
+PalLoop:
+; Note: Colors in a BMP file are saved as BGR values rather than RGB.
+mov al,[si+2] ; Get red value.
+shr al,1 ; Max. is 255, but video palette maximal
+shr al,1 ; Max. is 255, but video palette maximal
+; value is 63. Therefore dividing by 4.
+out dx,al ; Send it.
+mov al,[si+1] ; Get green value.
+
+shr al,1
+shr al,1
+out dx,al ; Send it.
+mov al,[si] ; Get blue value.
+
+shr al,1
+shr al,1
+out dx,al ; Send it.
+add si,4 ; Point to next color.
+; (There is a null chr. after every color.)
+
+loop PalLoop
+ret
+endp CopyPal
+
+
+proc CopyBitmap
+mov ax, 0A000h
+mov es, ax
+mov cx,200
+PrintBMPLoop:
+push cx
+; di = cx*320, point to the correct screen line
+mov di,cx
+
+;shift left cx - 6 bits
+shl cx,1
+shl cx,1
+shl cx,1
+shl cx,1
+shl cx,1
+shl cx,1
+
+;shift left di - 8 bits
+shl di,1
+shl di,1
+shl di,1
+shl di,1
+shl di,1
+shl di,1
+shl di,1
+shl di,1
+
+add di,cx
+; Read one line
+mov ah,3fh
+mov cx,320
+mov dx,offset ScrLine
+int 21h
+; Copy one line into video memory
+cld ; Clear direction flag, for movsb
+mov cx,320
+mov si,offset ScrLine
+
+rep movsb ; Copy line to the screen
+;rep movsb is same as the following code:
+;mov es:di, ds:si
+;inc si
+;inc di
+;dec cx
+;loop until cx=0
+pop cx
+loop PrintBMPLoop
+ret
+endp CopyBitmap
+
+
+proc CloseFile
+mov ah,3eh
+mov bx, [filehandle]
+int 21h
+ret
+endp CloseFile
+proc show_bitmap
+push ax
+push bx
+push cx
+push dx
+push si
+
+call OpenFile
+call ReadHeader
+call ReadPalette
+call CopyPal
+call CopyBitmap
+
+call CloseFile
+
+; Clean the to top most line by set all the top line pixels to black
+mov ax,0
+mov [TOP_Y],ax
+call CleanTopLine
+
+
+pop si
+pop dx
+pop cx
+pop bx
+pop ax
+ret
+endp show_bitmap
+main proc far
+MOV AX,@DATA
+MOV DS,AX
+mov ah,0
+MOV Al,13h
+INT 10h
+mov ax,13h   ; for 320x200x256 "CGA 256" colors (13h)
+mov bh,0h                   ;bh=0 page number always 0 for 320x200x256 CGA-256
+int 10h
+call show_bitmap
+
+
+endp main
+
+end main
+
+
+
+; [SOURCE]: C:\EMU8086\MySource\disp_image.asm

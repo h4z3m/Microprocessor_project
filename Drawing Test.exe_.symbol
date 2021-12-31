@@ -1,0 +1,16 @@
+< THE SYMBOL TABLE >  Drawing Test.exe_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00004     	-5        	SEGMENT   	(ITSELF)  
+IMG                      	00000     	1         	VAR       	data      
+CODE                     	00104     	-5        	SEGMENT   	(ITSELF)  
+MAIN                     	00000     	-1        	FAR       	code      
+DRAWIT                   	0001A     	-1        	LABEL     	code      
+START                    	00022     	-1        	LABEL     	code      
+ENDING                   	0002E     	-1        	LABEL     	code      
+===================================================================================================
+[ 12/23/2021  --  11:42:04 PM ] 
+< END >
+ 

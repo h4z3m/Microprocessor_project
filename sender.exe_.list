@@ -1,0 +1,197 @@
+EMU8086 GENERATED LISTING. MACHINE CODE <- SOURCE.
+ 
+sender.exe_ -- emu8086 assembler version: 4.08  
+ 
+[ 12/28/2021  --  6:28:54 PM ] 
+ 
+===================================================================================================
+[LINE]     LOC: MACHINE CODE                          SOURCE
+===================================================================================================
+ 
+[   1]        :                                       ; SENDER
+[   2]        :                                       .MODEL SMALL
+[   3]        :                                       .STACK 64
+[   4]        :                                       .DATA
+[   5]    0040: 1E 00 00 00 00 00 00 00 00 00 00 00   SEND_VALUE 30,?,30 DUP(?)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00 00 00             
+[   6]    0060: 00 00 00 00 00 00 00 00 00 00 00 00   REC_VALUE 30 DUP(?)
+                00 00 00 00 00 00 00 00 00 00 00 00 
+                00 00 00 00 00 00                   
+[   7]        :                                       .CODE
+[   8]        :                                       SETUP MACRO
+[   9]        :                                       mov ah,6       ; function 6
+[  10]        :                                       mov al,1        ; scroll by 1 line
+[  11]        :                                       mov bh,7       ; normal video attribute
+[  12]        :                                       mov ch,0       ; upper left Y
+[  13]        :                                       mov cl,0        ; upper left X
+[  14]        :                                       mov dh,12     ; lower right Y
+[  15]        :                                       mov dl,79      ; lower right X
+[  16]        :                                       int 10h
+[  17]        :                                       ENDM
+[  18]    0080:                                       SERIAL_INIT PROC
+[  19]        :                                       ; Divisor latch access bit
+[  20]    0080: BA FB 03                              mov dx,3fbh 			; Line Control Register
+[  21]    0083: B0 80                                 mov al,10000000b		;Set Divisor Latch Access Bit
+[  22]    0085: EE                                    out dx,al				;Out it
+[  23]        :                                       ; Set baudrate
+[  24]    0086: BA F8 03                              mov dx,3f8h			
+[  25]    0089: B0 0C                                 mov al,0ch			
+[  26]    008B: EE                                    out dx,al
+[  27]        :                                       ; Set MSB byte of baudrate
+[  28]    008C: BA F9 03                              mov dx,3f9h
+[  29]    008F: B0 00                                 mov al,00h
+[  30]    0091: EE                                    out dx,al
+[  31]        :                                       ; Set port config
+[  32]        :                                       ; 	0:Access to Receiver buffer, Transmitter buffer
+[  33]        :                                       ;	0:Set Break disabled
+[  34]        :                                       ;	011:Even Parity
+[  35]        :                                       ;	0:One Stop Bit
+[  36]        :                                       ;	11:8bits
+[  37]    0092: BA FB 03                              mov dx,3fbh
+[  38]    0095: B0 1B                                 mov al,00011011b
+[  39]    0097: EE                                    out dx,al
+[  40]    0098: C3                                    RET
+[  41]        :                                       SERIAL_INIT ENDP
+[  42]        :                                       read_string MACRO msg
+[  43]        :                                       
+[  44]        :                                       ENDM
+[  45]        :                                       
+[  46]    0099:                                       MAIN PROC FAR
+[  47]    0099: B8 04 00                              MOV AX,@DATA
+[  48]    009C: 8E D8                                 MOV DS,AX
+[  49]        :                                       ;---------------------------
+[  50]        :                                       ; INIT UART
+[  51]    009E: E8 DF FF                              CALL SERIAL_INIT
+[  52]    00A1: B4 06 B0 01 B7 07 B5 00 B1 00 B6 0C   SETUP
+                B2 4F CD 10                         
+[  53]        :                                       
+[  54]        :                                       
+[  55]    00B1:                                       MAIN_LOOP:
+[  56]        :                                       ; Read string
+[  57]    00B1: B4 0A                                 MOV AH,0AH
+[  58]    00B3: BA 00 00                              LEA DX,SEND_VALUE
+[  59]    00B6: CD 21                                 INT 21H
+[  60]        :                                       ; SEND
+[  61]    00B8: BE 02 00                              LEA SI,SEND_VALUE+2
+[  62]    00BB: 8A 0E 01 00                           MOV CL,SEND_VALUE+1
+[  63]        :                                       
+[  64]    00BF:                                       SERIAL_SEND_STRING:
+[  65]    00BF: BA FD 03                              mov dx , 3FDH		; Line Status Register
+[  66]    00C2:                                       AGAIN:  	
+[  67]    00C2: EC                                    In al , dx 			;Read Line Status
+[  68]    00C3: A8 20                                 		test al , 00100000b
+[  69]        :                                       	;JZ AGAIN                               ;Not empty
+[  70]        :                                       
+[  71]        :                                       ;If empty put the VALUE in Transmit data register
+[  72]    00C5: BA F8 03                              		mov dx , 3F8H		; Transmit data register
+[  73]    00C8: 8A 04                                 		mov  al,[SI]
+[  74]    00CA: 46                                    		INC SI
+[  75]    00CB: EE                                    		out dx , al
+[  76]    00CC: FE C9                                 DEC CL
+[  77]    00CE: 75 EF                                 JNZ SERIAL_SEND_STRING
+[  78]        :                                       
+[  79]    00D0: BA FD 03                              mov dx , 3FDH		; Line Status Register
+[  80]    00D3:                                       AGAIN1:  	
+[  81]    00D3: EC                                    In al , dx 			;Read Line Status
+[  82]    00D4: A8 20                                 		test al , 00100000b
+[  83]        :                                       	;JZ AGAIN1                               ;Not empty
+[  84]        :                                       
+[  85]        :                                       ;If empty put the VALUE in Transmit data register
+[  86]    00D6: BA F8 03                              		mov dx , 3F8H		; Transmit data register
+[  87]    00D9: B0 24                                 		mov  al,'$'
+[  88]    00DB: EE                                    		out dx , al
+[  89]    00DC: EB 00                                 JMP OK	
+[  90]        :                                       	
+[  91]        :                                       	; RECEIVE
+[  92]    00DE:                                       	 OK:
+[  93]    00DE: BE 20 00                              	LEA SI,REC_VALUE
+[  94]    00E1: 4E                                    	DEC SI
+[  95]    00E2:                                       	SERIAL_RECEIVE_STRING:
+[  96]    00E2: 46                                    	INC SI
+[  97]    00E3: BA FD 03                              	mov dx , 3FDH
+[  98]    00E6:                                       	CHK:	
+[  99]    00E6: EC                                    	    in al , dx
+[ 100]    00E7: A8 01                                 		test al , 1
+[ 101]    00E9: 74 FB                                 	JZ CHK                                    ;Not Ready
+[ 102]        :                                       ;If Ready read the VALUE in Receive data register
+[ 103]    00EB: BA F8 03                              		mov dx , 03F8H
+[ 104]    00EE: EC                                    		in al , dx
+[ 105]    00EF: 88 04                                 		mov  [SI], al
+[ 106]        :                                       		
+[ 107]        :                                       		
+[ 108]    00F1: 3C 24                                 CMP al,'$'
+[ 109]    00F3: 75 ED                                 JNZ SERIAL_RECEIVE_STRING
+[ 110]        :                                       
+[ 111]    00F5: C6 04 24                              MOV [SI],'$'
+[ 112]        :                                       	; DISPLAY STRING
+[ 113]    00F8: B4 09                                 mov ah,9
+[ 114]    00FA: BA 20 00                              LEA dx,REC_VALUE
+[ 115]    00FD: CD 21                                 int 21h
+[ 116]        :                                       	
+[ 117]    00FF: EB B0                                 	JMP MAIN_LOOP
+[ 118]        :                                       	
+[ 119]        :                                       	
+[ 120]        :                                       	
+[ 121]        :                                       	
+[ 122]        :                                       	
+[ 123]        :                                       	
+[ 124]        :                                       	
+[ 125]        :                                       	
+[ 126]        :                                       	
+[ 127]        :                                       	
+[ 128]        :                                       	
+[ 129]        :                                       	; Return control to DOS
+[ 130]    0101: B4 4C                                 MOV AH,04CH
+[ 131]    0103: 32 C0                                 XOR AL,AL
+[ 132]    0105: CD 21                                 INT 21H
+[ 133]        :                                       
+[ 134]        :                                       MAIN ENDP
+[ 135]        :                                       
+[ 136]        :                                       END MAIN
+[ 137]        :                                       
+ 
+===================================================================================================
+ 
+EXE HEADER - bytes from 0000 to 01FF inclusive.
+
+0000: 4D      -   exe signature (M)
+0001: 5A      -   exe signature (Z)
+0002: 07      -   bytes on last page (l.byte)
+0003: 01      -   bytes on last page (h.byte)
+0004: 02      -   512 byte pages in file (l.byte)
+0005: 00      -   512 byte pages in file (h.byte)
+0006: 01      -   relocations (l.byte)
+0007: 00      -   relocations (h.byte)
+0008: 20      -   paragraphs in header (l.byte)
+0009: 00      -   paragraphs in header (h.byte)
+000A: 00      -   minimum memory (l.byte)
+000B: 00      -   minimum memory (h.byte)
+000C: FF      -   maximum memory (l.byte)
+000D: FF      -   maximum memory (h.byte)
+000E: 00      -   SS - stack segment (l.byte)
+000F: 00      -   SS - stack segment (h.byte)
+0010: 40      -   SP - stack pointer (l.byte)
+0011: 00      -   SP - stack pointer (h.byte)
+0012: 8F      -   check sum (l.byte)
+0013: 37      -   check sum (h.byte)
+0014: 19      -   IP - instruction pointer (l.byte)
+0015: 00      -   IP - instruction pointer (h.byte)
+0016: 08      -   CS - code segment (l.byte)
+0017: 00      -   CS - code segment (h.byte)
+0018: 1E      -   relocation table adress (l.byte)
+0019: 00      -   relocation table adress (h.byte)
+001A: 00      -   overlay number (l.byte)
+001B: 00      -   overlay number (h.byte)
+001C: 01      -   signature (l.byte)
+001D: 00      -   signature (h.byte)
+001E: 1A      -   relocation table - offset inside segment (l.byte)
+001F: 00      -   relocation table - offset inside segment (h.byte)
+0020: 08      -   relocation table - segment anchor (l.byte)
+0021: 00      -   relocation table - segment anchor (h.byte)
+0022 to 01FF  -   reserved relocation area  (00) 
+
+
+
+
+===================================================================================================

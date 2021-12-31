@@ -1,0 +1,421 @@
+.model SMALL
+.stack 64
+.data
+HEX_CONV            DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+ascii_result        db 4 dup(?)
+buffer_ascii        dw ?
+num                 db '1','1','1','1'
+res                 dw ?
+OP1_STRING          DB 'AX~~'
+OP2_STRING          DB 'BX~~'
+OP1_SIZE DB 0
+OP2_SIZE DB 0
+PLAYER1 EQU 0
+PLAYER2 EQU 0FFH
+PLAYER_INPUT_STRING DW 0
+INPUT_STRING        DB 'mov ax,11',10
+ESC_SCODE EQU 1
+F1_SCODE EQU 03bh
+F2_SCODE EQU 03ch
+F4_SCODE EQU 03EH
+PLAYER1_MEMORY DB 16 DUP(7)
+vv db 'z2df'
+T1 DB ?
+T2 DB ?
+input_buffer DB 15,?,15 dup(?)
+buffer_num DW 0
+PLAYER1_POINTS DW 0
+current_exec_cpu dw 0
+current_exec_op1 dw 0
+current_exec_op2 dw 0
+AX_REG_2 LABEL WORD
+AL_REG_2 DB 023H
+AH_REG_2 DB 05H
+
+BX_REG_2 LABEL WORD
+BL_REG_2 DB 099H
+BH_REG_2 DB 0ECH
+
+CX_REG_2 LABEL WORD
+CL_REG_2 DB ?
+CH_REG_2 DB ?
+
+DX_REG_2 LABEL WORD
+DL_REG_2 DB ?
+DH_REG_2 DB ?
+
+SI_REG_2 DW ?
+DI_REG_2 DW ?
+BP_REG_2 DW ?
+SP_REG_2 DW ?
+AX_REG_1 LABEL WORD
+AL_REG_1 DB 0ABH
+AH_REG_1 DB 0CDH
+
+BX_REG_1 LABEL WORD
+BL_REG_1 DB 03FH
+BH_REG_1 DB 09EH
+
+CX_REG_1 LABEL WORD
+CL_REG_1 DB 033H
+CH_REG_1 DB 0ACH
+
+DX_REG_1 LABEL WORD
+DL_REG_1 DB 0EAH
+DH_REG_1 DB 0FFH
+
+SI_REG_1 DW 0BFADH
+DI_REG_1 DW 099FH
+BP_REG_1 DW 01H
+SP_REG_1 DW 0155H
+current_instruction_width dw 0
+REG16_NAMES DB 'AX','BX','CX','DX','SI','DI','BP','SP' ; REGISTER 16 BIT 8 REGISTER
+REG16_Address DB '[BX]','[SI]','[DI]','[BP]','[00]','[01]','[02]','[03]','[04]','[05]','[06]','[07]','[08]','[09]','[0A]','[0B]','[0C]','[0D]','[0E]','[0F]' ; ADDRESS REGISTER
+NUM_ADDRESS DB '[00]','[01]','[02]','[03]','[04]','[05]','[06]','[07]','[08]','[09]','[0A]','[0B]','[0C]','[0D]','[0E]','[0F]'
+REG16_Address_16 DB '[BX]','[SI]','[DI]','[BP]'
+REG8_NAMES DB 'AL','BL','CL','DL','AH','BH','CH','DH' ; REGISTER 8 BIT 8 REGISTER
+NUM_HEXA DB '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' ;  NUMBER TO CHECK FOR FOUR BIT
+INSTRUCTIONS_CONV DB 'PUSH ','OR ','POP ','MOV ','NOP ','ADD ','SUB ','XOR ','AND ','SHR ','SHL ','SAR ','ROR ','INC ','DEC ','ROL ','ADC ','SBB ','CLC ','RCR ','RCL '
+input_str db 'MOV AX,BX',10
+.code
+MOV_EXECUTE MACRO WIDTH
+LOCAL _8BIT,_16BIT,DONE
+MOV SI,current_exec_op1
+MOV DI,current_exec_op2
+CMP WIDTH,1
+JNZ  _16BIT
+_8BIT:
+MOV AL,[si]
+MOV CL,[di]
+MOV AL,CL
+MOV BYTE PTR [SI],AL
+JMP  DONE
+_16BIT:
+MOV AX,[si]
+MOV CX,[di]
+MOV AX,CX
+MOV [SI],AX
+DONE:
+ENDM
+main proc far
+mov  ax,@data
+mov  ds,ax
+MOV AX,13h  ; 320x200 256 colors
+;MOV AX,06H  ; 640x200 16  colors
+MOV BH,0H   ; First page on screen
+INT 10H
+MOV AX,@DATA
+MOV ES,AX
+MOV CX,4
+LEA SI,INSTRUCTIONS_CONV
+LEA DI,input_str
+CHECK_MOV:
+CMP CX,0
+JZ MOV_OPERAND
+MOV AL,[SI+12]
+MOV BL,[DI]
+INC SI
+INC DI
+DEC CX
+CMP AL,BL
+JZ CHECK_MOV
+MOV_OPERAND:
+MOV SI,OFFSET OP1_STRING    ;get OFFSET OF OP1
+MOV AL,[SI]
+MOV DI,OFFSET REG16_NAMES   ; COMPARE IF OP1 IS 16-BIT REG
+MOV BL,[DI]
+MOV CX,8
+;;;;;;;;;;;;;;;;;;;;;;;; CHECK OPERAND1 16 BIT REG ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHECK_REG16:
+CMP CX,0         ; IF ZERO MEAN CHECK IF OP1 8 BIT REG
+;JZ CHECK_REG8
+CMPSW            ; IF OP1 EXIST CHECK OP2 MATCHING WITH OP1
+JZ CHECK_OP2_16  ; CHECK ADDRESS OP2
+INC DI
+INC DI
+DEC CX
+JNZ CHECK_REG16 ; IF NOT CHECK NEXT OPERAND IN ARRAY
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CHECK OP2 REGISTER IS 16 BIT REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHECK_OP2_16:
+MOV BX,2
+MOV current_instruction_width,BX
+MOV AX,[DI-2]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;COMPARE TO ECEXUTE REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; COMPARE AX TO EXECUTE
+CMP AX ,'XA'
+JZ OP1_EXEC_AX
+JNZ OP1_CHECK_BX
+OP1_EXEC_AX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_AX
+LEA SI,AX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+JMP CHECK_OP2
+OP1_CPU_PLAYER2_AX:
+LEA SI,AX_REG_2
+MOV current_exec_op1,SI
+JMP CHECK_OP2
+
+; COMPARE BX TO EXECUTE
+OP1_CHECK_BX:
+CMP AX ,'XB'
+JZ OP1_EXEC_BX
+JNZ OP1_CHECK_CX
+OP1_EXEC_BX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_BX
+LEA SI,BX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+JMP CHECK_OP2
+OP1_CPU_PLAYER2_BX:
+LEA SI,BX_REG_2
+MOV current_exec_op1,SI
+JMP CHECK_OP2
+; COMPARE CX TO EXECUTE
+OP1_CHECK_CX:
+CMP AX ,'XC'
+JZ OP1_EXEC_CX
+JNZ OP1_CHECK_DX
+OP1_EXEC_CX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_CX
+LEA SI,CX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_CX:
+LEA SI,CX_REG_2
+MOV current_exec_op1,SI
+
+
+; COMPARE DX TO EXECUTE
+OP1_CHECK_DX:
+CMP AX ,'XD'
+JZ OP1_EXEC_DX
+JNZ OP1_CHECK_SI
+OP1_EXEC_DX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_DX
+LEA SI,DX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_DX:
+LEA SI,DX_REG_2
+MOV current_exec_op1,SI
+
+; COMPARE SI TO EXECUTE
+OP1_CHECK_SI:
+CMP AX ,'IS'
+JZ OP1_EXEC_SI
+JNZ OP1_CHECK_DI
+OP1_EXEC_SI:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_SI
+LEA SI,SI_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_SI:
+LEA SI,SI_REG_2
+MOV current_exec_op1,SI
+
+; COMPARE DI TO EXECUTE
+OP1_CHECK_DI:
+CMP AX ,'ID'
+JZ OP1_EXEC_DI
+JNZ OP1_CHECK_BP
+OP1_EXEC_DI:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_DI
+LEA SI,DI_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_DI:
+LEA SI,DI_REG_2
+MOV current_exec_op1,SI
+
+
+; COMPARE BP TO EXECUTE
+OP1_CHECK_BP:
+CMP AX ,'PB'
+JZ OP1_EXEC_BP
+JNZ OP1_CHECK_SP
+OP1_EXEC_BP:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_BP
+LEA SI,BP_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_BP:
+LEA SI,BP_REG_2
+MOV current_exec_op1,SI
+
+; COMPARE SP TO EXECUTE
+OP1_CHECK_SP:
+CMP AX ,'PS'
+JZ OP1_EXEC_SP
+JNZ INVALID_INPUT
+OP1_EXEC_SP:
+CMP current_exec_cpu , PLAYER1
+JNZ OP1_CPU_PLAYER2_SP
+LEA SI,SP_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP1_CPU_PLAYER2_SP:
+LEA SI,SP_REG_2
+MOV current_exec_op1,SI
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FINISH SET OP1 VALID ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHECK_OP2:
+MOV SI,OFFSET OP2_STRING
+MOV AL,[SI]
+MOV DI,OFFSET REG16_NAMES
+MOV BL,[DI]
+MOV CX,8
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CHECK OPERAND2-16-BIT REG;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHECK_REG16_OP2:
+CMP CX,0
+;JZ OP2_ADDRESS                ; IF OP2 IS NOT REGISTER JZ TO CHECK IF IT IS ADDRESS
+CMPSW                         ; CPMPARE OP2 16 BIT IF YES JUMP VALID AND OP2 = 16
+JZ OP2_INTIALIZE_16           ; valid And JUMP MOVE INSTRUCTION
+DEC SI
+DEC SI
+DEC CX
+JNZ CHECK_REG16_OP2           ; IF NOT ZERO CHECK FOR OTHER REG IN ARRAY
+
+
+
+OP2_INTIALIZE_16:
+MOV AX,[DI-2]
+; COMPARE AX TO EXECUTE
+CMP AX ,'XA'
+JZ OP2_EXEC_AX
+JNZ OP2_CHECK_BX
+OP2_EXEC_AX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_AX
+LEA SI,AX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+JMP away
+OP2_CPU_PLAYER2_AX:
+LEA SI,AX_REG_2
+MOV current_exec_op2,SI
+JMP away
+
+; COMPARE BX TO EXECUTE
+OP2_CHECK_BX:
+CMP AX ,'XB'
+JZ OP2_EXEC_BX
+JNZ OP2_CHECK_CX
+OP2_EXEC_BX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_BX
+LEA SI,BX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+JMP away
+OP2_CPU_PLAYER2_BX:
+LEA SI,BX_REG_2
+MOV current_exec_op2,SI
+JMP away
+; COMPARE CX TO EXECUTE
+OP2_CHECK_CX:
+CMP AX ,'XC'
+JZ OP2_EXEC_CX
+JNZ OP2_CHECK_DX
+OP2_EXEC_CX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_CX
+LEA SI,CX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+OP2_CPU_PLAYER2_CX:
+LEA SI,CX_REG_2
+MOV current_exec_op2,SI
+
+
+; COMPARE DX TO EXECUTE
+OP2_CHECK_DX:
+CMP AX ,'XD'
+JZ OP2_EXEC_DX
+JNZ OP2_CHECK_SI
+OP2_EXEC_DX:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_DX
+LEA SI,DX_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+OP2_CPU_PLAYER2_DX:
+LEA SI,DX_REG_2
+MOV current_exec_op2,SI
+
+; COMPARE SI TO EXECUTE
+OP2_CHECK_SI:
+CMP AX ,'IS'
+JZ OP2_EXEC_SI
+JNZ OP2_CHECK_DI
+OP2_EXEC_SI:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_SI
+LEA SI,SI_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+OP2_CPU_PLAYER2_SI:
+LEA SI,SI_REG_2
+MOV current_exec_op2,SI
+
+; COMPARE DI TO EXECUTE
+OP2_CHECK_DI:
+CMP AX ,'ID'
+JZ OP2_EXEC_DI
+JNZ OP2_CHECK_BP
+OP2_EXEC_DI:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_DI
+LEA SI,DI_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+OP2_CPU_PLAYER2_DI:
+LEA SI,DI_REG_2
+MOV current_exec_op2,SI
+
+
+; COMPARE BP TO EXECUTE
+OP2_CHECK_BP:
+CMP AX ,'PB'
+JZ OP2_EXEC_BP
+JNZ OP2_CHECK_SP
+OP2_EXEC_BP:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_BP
+LEA SI,BP_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op2,SI
+OP2_CPU_PLAYER2_BP:
+LEA SI,BP_REG_2
+MOV current_exec_op2,SI
+
+; COMPARE SP TO EXECUTE
+OP2_CHECK_SP:
+CMP AX ,'PS'
+JZ OP2_EXEC_SP
+JNZ INVALID_INPUT
+OP2_EXEC_SP:
+CMP current_exec_cpu , PLAYER1
+JNZ OP2_CPU_PLAYER2_SP
+LEA SI,SP_REG_1
+;LEA SI,AX_REG_1
+MOV current_exec_op1,SI
+OP2_CPU_PLAYER2_SP:
+LEA SI,SP_REG_2
+MOV current_exec_op1,SI
+
+away:
+MOV_EXECUTE current_instruction_width
+INVALID_INPUT:
+
+
+main endp
+end main
+

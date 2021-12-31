@@ -1,0 +1,22 @@
+< THE SYMBOL TABLE >  sender.exe_  --  emu8086 assembler version: 4.08 
+===================================================================================================
+Name                     	Offset    	Size      	Type      	Segment   
+===================================================================================================
+STACK                    	00000     	-5        	SEGMENT   	(ITSELF)  
+DATA                     	00004     	-5        	SEGMENT   	(ITSELF)  
+SEND_VALUE               	00000     	1         	VAR       	data      
+REC_VALUE                	00020     	1         	VAR       	data      
+CODE                     	00008     	-5        	SEGMENT   	(ITSELF)  
+SERIAL_INIT              	00000     	-1        	NEAR      	code      
+MAIN                     	00019     	-1        	FAR       	code      
+MAIN_LOOP                	00031     	-1        	LABEL     	code      
+SERIAL_SEND_STRING       	0003F     	-1        	LABEL     	code      
+AGAIN                    	00042     	-1        	LABEL     	code      
+AGAIN1                   	00053     	-1        	LABEL     	code      
+OK                       	0005E     	-1        	LABEL     	code      
+SERIAL_RECEIVE_STRING    	00062     	-1        	LABEL     	code      
+CHK                      	00066     	-1        	LABEL     	code      
+===================================================================================================
+[ 12/28/2021  --  6:28:54 PM ] 
+< END >
+ 
